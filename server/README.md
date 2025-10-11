@@ -1,219 +1,340 @@
-# Market Prices API 🚀
+# Price History API
 
-REST API to query product prices in Medellín marketplaces, built with FastAPI and PostgreSQL.
+## 📋 What does this module do?
 
-## What does this folder do?
+This module provides a RESTful API endpoint that retrieves and analyzes the historical price variation of products over a specified time period.
 
-This directory contains the project backend, which provides a REST API to:
-- Query updated product prices in different marketplaces
-- List all available products
-- List all Medellín marketplaces
-- Get combined options of products and markets in a single request
+### Key Features:
+- 📊 Fetches historical price data for any product
+- 📈 Calculates overall price trends (Increase/Decrease/Stability)
+- 🔍 Detects and segments different trend periods automatically
+- 📉 Provides statistical summaries (min, max, average prices)
+- 🎯 Returns data ready for chart visualization
 
-## How to install this part of the project?
+---
+
+## 🚀 Installation
 
 ### Prerequisites
-- Python 3.13 or higher
-- PostgreSQL installed and running
+- Python 3.9 or higher
 - pip (Python package manager)
+- PostgreSQL or MySQL database (with product and price tables)
 
-### Installation steps
+### Install Dependencies
 
-1. **Create a virtual environment** (recommended):
 ```bash
+# Create a virtual environment (recommended)
 python -m venv venv
+
+# Activate virtual environment
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+
+# Install required packages
+pip install fastapi
+pip install sqlalchemy
+pip install uvicorn[standard]
+pip install python-dotenv
 ```
 
-2. **Activate the virtual environment**:
-   - Windows:
-   ```bash
-   venv\Scripts\activate
-   ```
-   - Linux/Mac:
-   ```bash
-   source venv/bin/activate
-   ```
+Or install from requirements.txt:
 
-3. **Install dependencies**:
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Configure environment variables**:
-   
-   Create a `.env` file in the project root with the following content:
-   ```env
-   DATABASE_URL=postgresql://[user]:[password]@[host]:[port]/[database_name]
-   ```
-   
-   **Example**:
-   ```env
-   DATABASE_URL=postgresql://myuser:mypassword@localhost:5432/market_prices_db
-   ```
-   
-   Replace the values in brackets with your actual PostgreSQL credentials.
+### Requirements.txt
+```txt
+fastapi==0.104.1
+sqlalchemy==2.0.23
+uvicorn[standard]==0.24.0
+python-dotenv==1.0.0
+psycopg2-binary==2.9.9  # For PostgreSQL
+# OR
+pymysql==1.1.0  # For MySQL
+```
 
-## How to run this part of the project?
+---
 
-### Option 1 (recommended):
+## ▶️ How to Run
+
+### 1. Configure Database Connection
+
+Create a `database.py` file or ensure your database connection is configured:
+
+```python
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+# Example for PostgreSQL
+DATABASE_URL = "postgresql://user:password@localhost:5432/dbname"
+
+# Example for MySQL
+# DATABASE_URL = "mysql+pymysql://user:password@localhost:3306/dbname"
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+```
+
+### 2. Register the Router in main.py
+
+Add the price history router to your FastAPI application:
+
+```python
+# Register the price history router
+app.include_router(price_history_router, tags=["Price History"])
+```
+
+### 3. Start the API Server
+
 ```bash
-uvicorn main:app --reload
+# Run with uvicorn
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Option 2 (if the first one doesn't work):
+### 3. Access the API
+
+- **API Documentation (Swagger UI)**: http://localhost:8000/docs
+- **Alternative Documentation (ReDoc)**: http://localhost:8000/redoc
+- **Endpoint**: `GET /price-history/{product_name}?months=12`
+
+### Example Request
+
 ```bash
-python -m uvicorn main:app --reload
+# Using curl
+curl -X GET "http://localhost:8000/price-history/Papa%20Criolla?months=12"
+
+# Using HTTPie
+http GET "http://localhost:8000/price-history/Papa Criolla" months==12
 ```
 
-The API will be available at: `http://localhost:8000`
+---
 
-### Interactive documentation
+## 🗄️ Database Requirements
 
-Once the server is running, you can access:
-- **Swagger UI**: `http://localhost:8000/docs`
-- **ReDoc**: `http://localhost:8000/redoc`
+### Required Tables
 
-## What standards should be followed?
+The API expects the following database structure:
 
-### Python code standards
-- **PEP 8**: Style guide for Python code
-- **Type hints**: Use type annotations when possible
-- **Docstrings**: Document functions and classes using Google or NumPy format
-- **Descriptive names**: Variables and functions should have clear and descriptive names
-
-### Folder structure
-```
-server/
-├── routers/          # Endpoints organized by module
-├── models.py         # SQLAlchemy models
-├── database.py       # Database configuration
-├── main.py           # Application entry point
-└── requirements.txt  # Project dependencies
+#### 1. `productos` table
+```sql
+CREATE TABLE productos (
+    producto_id SERIAL PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    categoria_id INTEGER,
+    descripcion TEXT,
+    activo BOOLEAN DEFAULT TRUE,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
-### API conventions
-- Use appropriate HTTP verbs (GET, POST, PUT, DELETE)
-- Structured and consistent JSON responses
-- Semantic HTTP status codes
-- Endpoint documentation with FastAPI decorators
-
-## What Python version does it use?
-
-**Python 3.13** (compatible with 3.8+)
-
-To check your Python version:
-```bash
-python --version
+#### 2. `precios` table
+```sql
+CREATE TABLE precios (
+    precio_id SERIAL PRIMARY KEY,
+    producto_id INTEGER REFERENCES productos(producto_id),
+    precio_por_kg DECIMAL(10, 2) NOT NULL,
+    fecha DATE NOT NULL,
+    supermercado_id INTEGER,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
-## What do I need for the database?
-
-### Database requirements
-
-1. **PostgreSQL** installed and running (version 12 or higher recommended)
-
-2. **Table structure**:
-
-   The database must have the following tables:
-
-   ```sql
-   -- Products table
-   CREATE TABLE productos (
-       producto_id SERIAL PRIMARY KEY,
-       nombre VARCHAR NOT NULL UNIQUE
-   );
-
-   -- Marketplaces table
-   CREATE TABLE plazas_mercado (
-       plaza_id SERIAL PRIMARY KEY,
-       nombre VARCHAR NOT NULL,
-       ciudad VARCHAR NOT NULL
-   );
-
-   -- Prices table
-   CREATE TABLE precios (
-       precio_id SERIAL PRIMARY KEY,
-       producto_id INTEGER NOT NULL REFERENCES productos(producto_id),
-       plaza_id INTEGER NOT NULL REFERENCES plazas_mercado(plaza_id),
-       precio_por_kg DECIMAL(10,2) NOT NULL,
-       fecha DATE NOT NULL
-   );
-   ```
-
-3. **Database connection**:
-   
-   Configure the `.env` file with the connection URL in format:
-   ```
-   postgresql://[user]:[password]@[host]:[port]/[database_name]
-   ```
-   
-   **Parameters**:
-   - `[user]`: Your PostgreSQL user
-   - `[password]`: Your PostgreSQL password
-   - `[host]`: Server address (usually `localhost`)
-   - `[port]`: PostgreSQL port (default `5432`)
-   - `[database_name]`: Your database name
-
-### Sample data (optional)
-
-To test the API, you can insert sample data:
+### Sample Data
 
 ```sql
--- Insert products
-INSERT INTO productos (nombre) VALUES 
-    ('Tomate'),
-    ('Papa'),
-    ('Cebolla');
+-- Insert sample product
+INSERT INTO productos (nombre, categoria_id) 
+VALUES ('Papa Criolla', 1);
 
--- Insert marketplaces
-INSERT INTO plazas_mercado (nombre, ciudad) VALUES 
-    ('Minorista', 'Medellín'),
-    ('La América', 'Medellín');
-
--- Insert prices
-INSERT INTO precios (producto_id, plaza_id, precio_por_kg, fecha) VALUES 
-    (1, 1, 3500.00, CURRENT_DATE),
-    (2, 1, 2800.00, CURRENT_DATE);
+-- Insert historical prices (last 12 months)
+INSERT INTO precios (producto_id, precio_por_kg, fecha) VALUES
+(1, 3500, '2024-10-10'),
+(1, 3600, '2024-11-10'),
+(1, 3700, '2024-12-10'),
+(1, 3800, '2025-01-10'),
+(1, 3900, '2025-02-10'),
+(1, 4000, '2025-03-10'),
+(1, 4100, '2025-04-10'),
+(1, 4200, '2025-05-10'),
+(1, 4300, '2025-06-10'),
+(1, 4400, '2025-07-10'),
+(1, 4500, '2025-08-10'),
+(1, 4600, '2025-09-10'),
+(1, 4700, '2025-10-10');
 ```
 
-## Available endpoints
+---
 
-### `GET /`
-Check that the API is working.
+## 📚 Coding Standards
 
-### `GET /prices/latest/`
-Get the most recent price of a product in a specific marketplace.
+### Python Version
+- **Python 3.9+** (tested with 3.9, 3.10, 3.11)
 
-**Parameters**:
-- `product_name`: Product name (partial search)
-- `market_name`: Marketplace name (partial search)
+### Code Style
+- **PEP 8**: Python Enhancement Proposal 8 (official style guide)
+- **Type Hints**: Use type annotations for function parameters and returns
+- **Docstrings**: Google-style docstrings for all functions and classes
 
-### `GET /prices/options/`
-Get combined list of available products and marketplaces.
-
-### `GET /prices/productos/`
-List all available products.
-
-### `GET /prices/plazas/medellin/`
-List all Medellín marketplaces.
-
-## Common troubleshooting
-
-### Error running uvicorn
-If `uvicorn main:app --reload` doesn't work, use:
-```bash
-python -m uvicorn main:app --reload
+### Documentation Standards
+```python
+def function_name(param1: str, param2: int) -> Dict:
+    """
+    Brief description of what the function does.
+    
+    Args:
+        param1: Description of param1
+        param2: Description of param2
+    
+    Returns:
+        Description of return value
+    
+    Raises:
+        HTTPException: Description of when this is raised
+    """
+    pass
 ```
 
-### Database connection error
-Verify that:
-- PostgreSQL is running
-- Credentials in `.env` are correct
-- The database exists
-- The user has sufficient permissions
+### Naming Conventions
+- **Functions/Variables**: `snake_case` (e.g., `analyze_periods`, `product_name`)
+- **Classes**: `PascalCase` (e.g., `ProductHistory`)
+- **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_MONTHS`)
+- **Database tables**: Spanish names as per existing schema
 
-### ModuleNotFoundError
-Make sure you have activated the virtual environment and run:
+### Code Quality Tools (Recommended)
 ```bash
-pip install -r requirements.txt
+# Install linting tools
+pip install black flake8 mypy pylint
+
+# Format code
+black price_history.py
+
+# Check style
+flake8 price_history.py
+
+# Type checking
+mypy price_history.py
+```
+
+---
+
+## 📖 API Response Schema
+
+### Success Response (200)
+```json
+{
+  "product": "Papa Criolla",
+  "period_months": 12,
+  "start_date": "2024-10-10T00:00:00",
+  "end_date": "2025-10-10T00:00:00",
+  "overall_trend": "Increase",
+  "statistics": {
+    "initial_price": 3500,
+    "final_price": 4700,
+    "average_price": 4100,
+    "max_price": 4700,
+    "min_price": 3500,
+    "percent_variation": 34.29,
+    "total_records": 13
+  },
+  "periods": [
+    {
+      "start_date": "2024-10-10T00:00:00",
+      "end_date": "2025-10-10T00:00:00",
+      "start_price": 3500,
+      "end_price": 4700,
+      "trend": "Increase",
+      "percent_variation": 34.29
+    }
+  ],
+  "history": [
+    {
+      "date": "2024-10-10T00:00:00",
+      "price_per_kg": 3500
+    }
+    // ... more data points
+  ]
+}
+```
+
+### Error Response (404)
+```json
+{
+  "detail": "No historical data found for Papa Criolla in the last 12 months"
+}
+```
+
+---
+
+## 🧪 Testing
+
+### Run Manual Tests
+
+```bash
+# Test with different products
+curl "http://localhost:8000/price-history/Papa%20Criolla?months=12"
+curl "http://localhost:8000/price-history/Aguacate%20Comun?months=6"
+
+# Test error handling
+curl "http://localhost:8000/price-history/NonExistentProduct?months=12"
+```
+
+---
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Create a `.env` file:
+
+```env
+# Database Configuration
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+
+# API Configuration
+API_HOST=0.0.0.0
+API_PORT=8000
+DEBUG_MODE=True
+
+# Business Logic
+DEFAULT_MONTHS=12
+TREND_THRESHOLD=5.0  # Percentage for trend detection
+```
+
+Load in your application:
+```python
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**1. Database Connection Error**
+```
+Solution: Check DATABASE_URL in database.py
+Verify database is running: pg_isready (PostgreSQL)
+```
+
+**2. No Data Found (404)**
+```
+Solution: Ensure products table has data
+Check product name matches exactly (case-insensitive search is enabled)
+Verify precios table has entries within the requested time range
+```
+
+**3. Module Import Error**
+```
+Solution: Ensure all dependencies are installed
+Activate virtual environment before running
+Check Python version (3.9+)
 ```
