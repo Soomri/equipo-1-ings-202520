@@ -1,4 +1,4 @@
-/* Reset and base styles */
+/* Reset y estilos base */
 * {
   margin: 0;
   padding: 0;
@@ -14,7 +14,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* CSS Variables for Theme Colors */
+/* Variables CSS para colores del tema */
 :root {
   --primary-color: #4CAF50;
   --primary-dark: #2E7D32;
@@ -36,7 +36,7 @@ body {
   --radius-lg: 10px;
 }
 
-/* Utilities */
+/* Utilidades */
 .container {
   max-width: 1200px;
   margin: 0 auto;
