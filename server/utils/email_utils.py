@@ -1,16 +1,96 @@
-# email_utils.py
-from sqlalchemy.orm import Session
-from database import get_db
-from models import User
+"""
+Email notification utilities for user account security alerts.
+
+This module provides functions for sending automated email notifications
+related to account security events, such as temporary account locks due to
+failed login attempts. Emails include password recovery links and are sent
+via Gmail SMTP.
+
+Features:
+    - Account lock notifications with recovery links
+    - HTML-formatted emails for better user experience
+    - Automatic password recovery link generation
+    - Secure SMTP transmission via Gmail
+
+Environment Variables:
+    EMAIL_USER: Gmail address for sending notifications
+    EMAIL_PASS: Gmail app password for SMTP authentication
+
+Usage:
+    from utils.email_utils import send_lock_email
+    
+    # Send lock notification (typically from login endpoint)
+    send_lock_email("user@example.com", "John Doe")
+"""
+
+import os
 import smtplib
 from email.mime.text import MIMEText
+
+from sqlalchemy.orm import Session
+
+from database import get_db
+from models import User
 from utils.password_utils import create_password_recovery_link
-import os
+
+
+# ===============================
+# EMAIL NOTIFICATION FUNCTIONS
+# ===============================
 
 def send_lock_email(email: str, user_name: str):
     """
-    Sends an email notifying that the account has been temporarily locked
-    due to multiple failed login attempts, including a recovery link.
+    Send account lock notification email with password recovery link.
+
+    Notifies the user that their account has been temporarily locked due to
+    multiple failed login attempts. The email includes a time-limited password
+    recovery link that allows the user to regain access immediately by
+    resetting their password.
+
+    The function creates its own database session to fetch user information
+    and generate a recovery token. The session is properly closed in the
+    finally block to prevent connection leaks.
+
+    Args:
+        email (str): Email address of the locked account.
+        user_name (str): User's display name for email personalization.
+
+    Returns:
+        None
+
+    Side Effects:
+        - Creates a new database session
+        - Generates a password recovery token in the database
+        - Sends an HTML email via Gmail SMTP
+        - Prints status messages to console (for logging/debugging)
+
+    Email Contents:
+        - Account lock notification
+        - Password recovery button with unique link
+        - Security warning about unauthorized access attempts
+        - Link expiration notice (typically 1 hour)
+
+    Error Handling:
+        - Silently fails if user is not found (prints error to console)
+        - Catches and logs SMTP exceptions without raising
+        - Ensures database session cleanup in finally block
+
+    Example:
+        >>> send_lock_email("user@example.com", "John Doe")
+        Generando enlace de recuperación...
+        Link generado: https://app.com/reset/abc123...
+        Correo de bloqueo enviado a user@example.com
+
+    Security Notes:
+        - Recovery links are single-use and time-limited
+        - Uses Gmail SMTP SSL for encrypted transmission
+        - Requires app-specific password (not regular Gmail password)
+        - Warns users about potential unauthorized access
+
+    Note:
+        This function is typically called as a background task from the
+        login endpoint to avoid blocking the HTTP response. The database
+        session is created internally to work safely in background contexts.
     """
 
     # Create a new database session inside the function
@@ -64,10 +144,12 @@ def send_lock_email(email: str, user_name: str):
     </html>
     """, "html")
 
+    # Prepare email message
     msg["Subject"] = "❌ Cuenta bloqueada temporalmente"
     msg["From"] = f"Plaze Soporte <{os.getenv('EMAIL_USER')}>"
     msg["To"] = email
 
+    # Send email via Gmail SMTP
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(os.getenv("EMAIL_USER"), os.getenv("EMAIL_PASS"))
@@ -76,7 +158,5 @@ def send_lock_email(email: str, user_name: str):
     except Exception as e:
         print(f"Error al enviar el correo de bloqueo: {e}")
     finally:
+        # Always close the database session
         db.close()
-
-
-
