@@ -1,15 +1,17 @@
-# Price History API
+# 🧮 Price History API
 
-## 📋 What does this module do?
+## 📋 Overview
+This module provides a **RESTful API endpoint** that retrieves and analyzes the historical price variation of products over a specified number of months. It automatically detects **periods of increase, decrease, or stability** and returns detailed statistics and trends.
 
-This module provides a RESTful API endpoint that retrieves and analyzes the historical price variation of products over a specified time period.
+---
 
-### Key Features:
-- 📊 Fetches historical price data for any product
-- 📈 Calculates overall price trends (Increase/Decrease/Stability)
-- 🔍 Detects and segments different trend periods automatically
-- 📉 Provides statistical summaries (min, max, average prices)
-- 🎯 Returns data ready for chart visualization
+## ✨ Key Features
+- 📊 Retrieve historical price data by product name
+- 🔁 Automatically detects trend periods (Increase / Decrease / Stability)
+- 📈 Calculates overall price trends and variations
+- 📉 Provides key statistics (min, max, average, percentage change)
+- ⚙️ Robust error handling and SQL-safe queries
+- 🧠 Normalizes product names to handle spaces, hyphens, and case differences
 
 ---
 
@@ -18,34 +20,23 @@ This module provides a RESTful API endpoint that retrieves and analyzes the hist
 ### Prerequisites
 - Python 3.9 or higher
 - pip (Python package manager)
-- PostgreSQL or MySQL database (with product and price tables)
+- PostgreSQL or MySQL database
 
 ### Install Dependencies
-
 ```bash
-# Create a virtual environment (recommended)
 python -m venv venv
+source venv/bin/activate  # Linux/macOS
+# venv\Scripts\activate   # Windows
 
-# Activate virtual environment
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
-
-# Install required packages
-pip install fastapi
-pip install sqlalchemy
-pip install uvicorn[standard]
-pip install python-dotenv
+pip install fastapi sqlalchemy uvicorn[standard] python-dotenv
 ```
 
-Or install from requirements.txt:
-
+Or use:
 ```bash
 pip install -r requirements.txt
 ```
 
-### Requirements.txt
+### Example `requirements.txt`
 ```txt
 fastapi==0.104.1
 sqlalchemy==2.0.23
@@ -53,288 +44,160 @@ uvicorn[standard]==0.24.0
 python-dotenv==1.0.0
 psycopg2-binary==2.9.9  # For PostgreSQL
 # OR
-pymysql==1.1.0  # For MySQL
+pymysql==1.1.0          # For MySQL
 ```
 
 ---
 
 ## ▶️ How to Run
 
-### 1. Configure Database Connection
-
-Create a `database.py` file or ensure your database connection is configured:
-
+### 1. Configure Database
+`database.py` example:
 ```python
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-# Example for PostgreSQL
 DATABASE_URL = "postgresql://user:password@localhost:5432/dbname"
-
-# Example for MySQL
-# DATABASE_URL = "mysql+pymysql://user:password@localhost:3306/dbname"
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 ```
 
-### 2. Register the Router in main.py
-
-Add the price history router to your FastAPI application:
-
+### 2. Register the Router
 ```python
-# Register the price history router
-app.include_router(price_history_router, tags=["Price History"])
+from fastapi import FastAPI
+from price_history import router as price_history_router
+
+app = FastAPI()
+app.include_router(price_history_router)
 ```
 
-### 3. Start the API Server
-
+### 3. Start the API
 ```bash
-# Run with uvicorn
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 3. Access the API
+### 4. Access the Docs
+- Swagger UI → [http://localhost:8000/docs](http://localhost:8000/docs)
+- Redoc → [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
-- **API Documentation (Swagger UI)**: http://localhost:8000/docs
-- **Alternative Documentation (ReDoc)**: http://localhost:8000/redoc
-- **Endpoint**: `GET /price-history/{product_name}?months=12`
+---
 
-### Example Request
+## 🧠 Endpoint
 
+### `GET /price-history/{product_name}?months=12`
+
+#### Example Request
 ```bash
-# Using curl
-curl -X GET "http://localhost:8000/price-history/Papa%20Criolla?months=12"
-
-# Using HTTPie
-http GET "http://localhost:8000/price-history/Papa Criolla" months==12
+curl "http://localhost:8000/price-history/Aguacate%20Comun?months=12"
 ```
 
----
-
-## 🗄️ Database Requirements
-
-### Required Tables
-
-The API expects the following database structure:
-
-#### 1. `productos` table
-```sql
-CREATE TABLE productos (
-    producto_id SERIAL PRIMARY KEY,
-    nombre VARCHAR(255) NOT NULL,
-    categoria_id INTEGER,
-    descripcion TEXT,
-    activo BOOLEAN DEFAULT TRUE,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-#### 2. `precios` table
-```sql
-CREATE TABLE precios (
-    precio_id SERIAL PRIMARY KEY,
-    producto_id INTEGER REFERENCES productos(producto_id),
-    precio_por_kg DECIMAL(10, 2) NOT NULL,
-    fecha DATE NOT NULL,
-    supermercado_id INTEGER,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### Sample Data
-
-```sql
--- Insert sample product
-INSERT INTO productos (nombre, categoria_id) 
-VALUES ('Papa Criolla', 1);
-
--- Insert historical prices (last 12 months)
-INSERT INTO precios (producto_id, precio_por_kg, fecha) VALUES
-(1, 3500, '2024-10-10'),
-(1, 3600, '2024-11-10'),
-(1, 3700, '2024-12-10'),
-(1, 3800, '2025-01-10'),
-(1, 3900, '2025-02-10'),
-(1, 4000, '2025-03-10'),
-(1, 4100, '2025-04-10'),
-(1, 4200, '2025-05-10'),
-(1, 4300, '2025-06-10'),
-(1, 4400, '2025-07-10'),
-(1, 4500, '2025-08-10'),
-(1, 4600, '2025-09-10'),
-(1, 4700, '2025-10-10');
-```
-
----
-
-## 📚 Coding Standards
-
-### Python Version
-- **Python 3.9+** (tested with 3.9, 3.10, 3.11)
-
-### Code Style
-- **PEP 8**: Python Enhancement Proposal 8 (official style guide)
-- **Type Hints**: Use type annotations for function parameters and returns
-- **Docstrings**: Google-style docstrings for all functions and classes
-
-### Documentation Standards
-```python
-def function_name(param1: str, param2: int) -> Dict:
-    """
-    Brief description of what the function does.
-    
-    Args:
-        param1: Description of param1
-        param2: Description of param2
-    
-    Returns:
-        Description of return value
-    
-    Raises:
-        HTTPException: Description of when this is raised
-    """
-    pass
-```
-
-### Naming Conventions
-- **Functions/Variables**: `snake_case` (e.g., `analyze_periods`, `product_name`)
-- **Classes**: `PascalCase` (e.g., `ProductHistory`)
-- **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_MONTHS`)
-- **Database tables**: Spanish names as per existing schema
-
-### Code Quality Tools (Recommended)
-```bash
-# Install linting tools
-pip install black flake8 mypy pylint
-
-# Format code
-black price_history.py
-
-# Check style
-flake8 price_history.py
-
-# Type checking
-mypy price_history.py
-```
-
----
-
-## 📖 API Response Schema
-
-### Success Response (200)
+#### Example Successful Response (200)
 ```json
 {
-  "product": "Papa Criolla",
+  "product": "Aguacate Comun",
   "period_months": 12,
-  "start_date": "2024-10-10T00:00:00",
-  "end_date": "2025-10-10T00:00:00",
-  "overall_trend": "Increase",
+  "start_date": "2024-12-01T00:00:00",
+  "end_date": "2025-12-01T00:00:00",
+  "overall_trend": "Stability",
   "statistics": {
-    "initial_price": 3500,
-    "final_price": 4700,
-    "average_price": 4100,
-    "max_price": 4700,
-    "min_price": 3500,
-    "percent_variation": 34.29,
-    "total_records": 13
+    "initial_price": 4233,
+    "final_price": 4233,
+    "average_price": 4233,
+    "max_price": 4233,
+    "min_price": 4233,
+    "percent_variation": 0.0,
+    "total_records": 1
   },
-  "periods": [
-    {
-      "start_date": "2024-10-10T00:00:00",
-      "end_date": "2025-10-10T00:00:00",
-      "start_price": 3500,
-      "end_price": 4700,
-      "trend": "Increase",
-      "percent_variation": 34.29
-    }
-  ],
+  "periods": [],
   "history": [
     {
-      "date": "2024-10-10T00:00:00",
-      "price_per_kg": 3500
+      "date": "2024-12-01T00:00:00",
+      "price_per_kg": 4233
     }
-    // ... more data points
   ]
 }
 ```
 
-### Error Response (404)
+#### Error Response (404)
 ```json
 {
-  "detail": "No historical data found for Papa Criolla in the last 12 months"
+  "detail": "No historical data found for Aguacate Comun in the last 12 months."
 }
 ```
+
+#### Error Response (500)
+```json
+{
+  "detail": "SQL Error: syntax error at or near ..."
+}
+```
+
+---
+
+## 🧩 How Trends Are Calculated
+
+- **Increase** → Price variation > +2%
+- **Decrease** → Price variation < -2%
+- **Stability** → Variation between -2% and +2%
+
+If total variation > 5% → overall trend = *Increase*
+If total variation < -5% → overall trend = *Decrease*
+Else → *Stability*
 
 ---
 
 ## 🧪 Testing
 
-### Run Manual Tests
-
+### Manual Tests
 ```bash
-# Test with different products
-curl "http://localhost:8000/price-history/Papa%20Criolla?months=12"
-curl "http://localhost:8000/price-history/Aguacate%20Comun?months=6"
+# Existing product
+curl "http://localhost:8000/price-history/Aguacate%20Comun?months=12"
 
-# Test error handling
-curl "http://localhost:8000/price-history/NonExistentProduct?months=12"
+# Non-existent product
+curl "http://localhost:8000/price-history/NoExiste?months=12"
 ```
 
 ---
 
-## 🔧 Configuration
-
-### Environment Variables
+## ⚙️ Configuration
 
 Create a `.env` file:
-
 ```env
-# Database Configuration
 DATABASE_URL=postgresql://user:password@localhost:5432/dbname
-
-# API Configuration
-API_HOST=0.0.0.0
-API_PORT=8000
-DEBUG_MODE=True
-
-# Business Logic
 DEFAULT_MONTHS=12
-TREND_THRESHOLD=5.0  # Percentage for trend detection
-```
-
-Load in your application:
-```python
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
+TREND_THRESHOLD=2.0
 ```
 
 ---
 
-## 🐛 Troubleshooting
+## 🧱 Database Schema
 
-### Common Issues
-
-**1. Database Connection Error**
-```
-Solution: Check DATABASE_URL in database.py
-Verify database is running: pg_isready (PostgreSQL)
-```
-
-**2. No Data Found (404)**
-```
-Solution: Ensure products table has data
-Check product name matches exactly (case-insensitive search is enabled)
-Verify precios table has entries within the requested time range
+### `productos`
+```sql
+CREATE TABLE productos (
+    producto_id SERIAL PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    categoria_id INTEGER,
+    descripcion TEXT
+);
 ```
 
-**3. Module Import Error**
+### `precios`
+```sql
+CREATE TABLE precios (
+    precio_id SERIAL PRIMARY KEY,
+    producto_id INTEGER REFERENCES productos(producto_id),
+    precio_por_kg DECIMAL(10, 2) NOT NULL,
+    fecha DATE NOT NULL
+);
 ```
-Solution: Ensure all dependencies are installed
-Activate virtual environment before running
-Check Python version (3.9+)
-```
+
+---
+
+## 💡 Code Standards
+
+- **Python** ≥ 3.9
+- **PEP 8** compliant
+- Use **type hints** and **docstrings**
+- Format with `black`, lint with `flake8`
