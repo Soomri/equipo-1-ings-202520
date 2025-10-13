@@ -16,6 +16,37 @@ router = APIRouter(
 )
 
 
+def find_similar_products(db, product_name: str, limit: int = 5) -> List[str]:
+    """
+    Finds products with similar names using partial matching.
+    
+    Args:
+        db: Database session
+        product_name (str): Product name to search for
+        limit (int): Maximum number of suggestions to return
+        
+    Returns:
+        List[str]: List of similar product names
+    """
+    try:
+        query = text("""
+            SELECT DISTINCT prod.nombre
+            FROM productos AS prod
+            WHERE LOWER(prod.nombre) LIKE LOWER(:search_pattern)
+            LIMIT :limit
+        """)
+        
+        search_pattern = f"%{product_name}%"
+        result = db.execute(query, {
+            "search_pattern": search_pattern,
+            "limit": limit
+        }).fetchall()
+        
+        return [row[0] for row in result]
+    except Exception:
+        return []
+
+
 def analyze_periods(history: List[Dict]) -> List[Dict]:
     """
     Analyzes the product's price history to detect trend periods.
@@ -24,16 +55,16 @@ def analyze_periods(history: List[Dict]) -> List[Dict]:
     decrease, or stability based on a ±2% variation threshold.
 
     Args:
-        history (List[Dict]): List of price records with 'date' and 'price_per_kg' keys.
+        history (List[Dict]): List of price records with 'fecha' and 'precio_por_kg' keys.
 
     Returns:
         List[Dict]: List of detected trend periods, each including:
-            - start_date: Period start date
-            - end_date: Period end date
-            - start_price: Initial price in the period
-            - end_price: Final price in the period
-            - trend: Type of trend ("Increase", "Decrease", "Stability")
-            - percent_variation: Percentage change across the period
+            - fecha_inicio: Period start date
+            - fecha_fin: Period end date
+            - precio_inicio: Initial price in the period
+            - precio_fin: Final price in the period
+            - tendencia: Type of trend ("Aumento", "Disminución", "Estabilidad")
+            - variacion_porcentual: Percentage change across the period
     """
     if len(history) < 2:
         return []
@@ -43,25 +74,25 @@ def analyze_periods(history: List[Dict]) -> List[Dict]:
 
     while i < len(history) - 1:
         period_start = history[i]
-        initial_price = period_start["price_per_kg"]
+        initial_price = period_start["precio_por_kg"]
         current_trend = None
         j = i + 1
 
         # Identify how far the current trend continues
         while j < len(history):
-            current_price = history[j]["price_per_kg"]
-            previous_price = history[j - 1]["price_per_kg"]
+            current_price = history[j]["precio_por_kg"]
+            previous_price = history[j - 1]["precio_por_kg"]
 
             # Calculate percentage variation
             variation = ((current_price - previous_price) / previous_price) * 100
 
             # Determine the trend type
             if variation > 2:
-                new_trend = "Increase"
+                new_trend = "Aumento"
             elif variation < -2:
-                new_trend = "Decrease"
+                new_trend = "Disminución"
             else:
-                new_trend = "Stability"
+                new_trend = "Estabilidad"
 
             # If trend changes, close the period
             if current_trend is None:
@@ -73,15 +104,15 @@ def analyze_periods(history: List[Dict]) -> List[Dict]:
 
         # Register detected period
         period_end = history[j - 1]
-        period_variation = ((period_end["price_per_kg"] - initial_price) / initial_price) * 100
+        period_variation = ((period_end["precio_por_kg"] - initial_price) / initial_price) * 100
 
         periods.append({
-            "start_date": period_start["date"],
-            "end_date": period_end["date"],
-            "start_price": initial_price,
-            "end_price": period_end["price_per_kg"],
-            "trend": current_trend,
-            "percent_variation": round(period_variation, 2)
+            "fecha_inicio": period_start["fecha"],
+            "fecha_fin": period_end["fecha"],
+            "precio_inicio": initial_price,
+            "precio_fin": period_end["precio_por_kg"],
+            "tendencia": current_trend,
+            "variacion_porcentual": round(period_variation, 2)
         })
 
         i = j
@@ -92,14 +123,14 @@ def analyze_periods(history: List[Dict]) -> List[Dict]:
 @router.get("/{product_name}")
 def get_price_history(
     product_name: str,
-    months: int = Query(12, description="Number of months to query (default: 12)")
+    months: int = Query(12, description="Número de meses a consultar (por defecto: 12)")
 ) -> Dict:
     """
     Retrieves and analyzes the historical price variation of a product.
 
     Queries the database for price data of the given product within
     the specified time range, calculates general statistics, detects
-    trend periods, and returns a structured JSON response.
+    trend periods, and returns a structured JSON response in Spanish.
 
     Args:
         product_name (str): Name of the product to analyze.
@@ -107,17 +138,17 @@ def get_price_history(
 
     Returns:
         Dict: JSON object containing:
-            - product: Normalized product name
-            - period_months: Number of months analyzed
-            - start_date, end_date: Range of analyzed data
-            - overall_trend: Global trend ("Increase", "Decrease", "Stability")
-            - statistics: General numeric metrics
-            - periods: List of detected trend periods
-            - history: Detailed chronological list of prices
+            - producto: Normalized product name
+            - periodo_meses: Number of months analyzed
+            - fecha_inicio, fecha_fin: Range of analyzed data
+            - tendencia_general: Global trend ("Aumento", "Disminución", "Estabilidad")
+            - estadisticas: General numeric metrics
+            - periodos: List of detected trend periods
+            - historial: Detailed chronological list of prices
 
     Raises:
         HTTPException:
-            - 404 if no data found for the product
+            - 404 if no data found (with suggestions if partial match found)
             - 500 if an SQL or database error occurs
     """
     db = SessionLocal()
@@ -148,14 +179,23 @@ def get_price_history(
                 "start_date": start_date
             }).fetchall()
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"SQL Error: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Error en la base de datos: {str(e)}")
 
-        # Handle empty result set
+        # Handle empty result set - try to find similar products
         if not result:
-            raise HTTPException(
-                status_code=404,
-                detail=f"No historical data found for {product_name} in the last {months} months."
-            )
+            similar_products = find_similar_products(db, product_name_normalized)
+            
+            if similar_products:
+                suggestions = ", ".join(similar_products)
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"No se encontraron datos históricos para '{product_name}' en los últimos {months} meses. ¿Quisiste decir alguno de estos productos? {suggestions}"
+                )
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"No se encontraron datos históricos para '{product_name}' en los últimos {months} meses."
+                )
 
         # Convert results into structured history list
         history = []
@@ -168,23 +208,23 @@ def get_price_history(
                     pass  # Keep as string if cannot parse
 
             history.append({
-                "date": date_value.isoformat() if hasattr(date_value, "isoformat") else str(date_value),
-                "price_per_kg": float(r[1])
+                "fecha": date_value.isoformat() if hasattr(date_value, "isoformat") else str(date_value),
+                "precio_por_kg": float(r[1])
             })
 
         # Compute overall statistics
-        initial_price = history[0]["price_per_kg"]
-        final_price = history[-1]["price_per_kg"]
+        initial_price = history[0]["precio_por_kg"]
+        final_price = history[-1]["precio_por_kg"]
         percent_variation = ((final_price - initial_price) / initial_price) * 100
 
         if percent_variation > 5:
-            overall_trend = "Increase"
+            overall_trend = "Aumento"
         elif percent_variation < -5:
-            overall_trend = "Decrease"
+            overall_trend = "Disminución"
         else:
-            overall_trend = "Stability"
+            overall_trend = "Estabilidad"
 
-        prices = [item["price_per_kg"] for item in history]
+        prices = [item["precio_por_kg"] for item in history]
         average_price = sum(prices) / len(prices)
         max_price = max(prices)
         min_price = min(prices)
@@ -192,24 +232,24 @@ def get_price_history(
         # Detect specific trend periods
         periods = analyze_periods(history)
 
-        # Return structured response
+        # Return structured response in Spanish
         return {
-            "product": product_name_normalized,
-            "period_months": months,
-            "start_date": history[0]["date"],
-            "end_date": history[-1]["date"],
-            "overall_trend": overall_trend,
-            "statistics": {
-                "initial_price": initial_price,
-                "final_price": final_price,
-                "average_price": round(average_price, 2),
-                "max_price": max_price,
-                "min_price": min_price,
-                "percent_variation": round(percent_variation, 2),
-                "total_records": len(history)
+            "producto": product_name_normalized,
+            "periodo_meses": months,
+            "fecha_inicio": history[0]["fecha"],
+            "fecha_fin": history[-1]["fecha"],
+            "tendencia_general": overall_trend,
+            "estadisticas": {
+                "precio_inicial": initial_price,
+                "precio_final": final_price,
+                "precio_promedio": round(average_price, 2),
+                "precio_maximo": max_price,
+                "precio_minimo": min_price,
+                "variacion_porcentual": round(percent_variation, 2),
+                "total_registros": len(history)
             },
-            "periods": periods,
-            "history": history
+            "periodos": periods,
+            "historial": history
         }
 
     finally:
