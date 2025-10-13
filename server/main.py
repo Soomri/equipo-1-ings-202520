@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import auth, password_recovery, price_history
+from routers import price_history
 from database import Base, engine
 from dotenv import load_dotenv
 load_dotenv()
