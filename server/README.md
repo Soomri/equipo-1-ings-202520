@@ -39,7 +39,7 @@ fastapi==0.104.1
 sqlalchemy==2.0.23
 uvicorn[standard]==0.24.0
 python-dotenv==1.0.0
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.11
 ```
 
 ## 🧠 Endpoint
