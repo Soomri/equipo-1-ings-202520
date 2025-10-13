@@ -1,0 +1,5 @@
+fastapi              # For APIRouter, HTTPException, Query
+uvicorn              # For running the development server
+sqlalchemy           # For text() and SQL query handling
+psycopg2-binary      # PostgreSQL driver to connect to Supabase
+python-dotenv        # For loading environment variables (.env)
