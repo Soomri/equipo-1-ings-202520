@@ -95,7 +95,7 @@ curl "http://localhost:8000/price-history/Aguacate%20Comun?months=12"
 #### Error Response (500)
 ```json
 {
-  "detail": "Error en la base de datos: syntax error at or near ..."
+  "detail": "Error en la base de datos: error de sintaxis en ..."
 }
 ```
 
