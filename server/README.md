@@ -33,15 +33,6 @@ source venv/bin/activate  # Linux/macOS
 pip install -r requirements.txt
 ```
 
-### Example `requirements.txt`
-```txt
-fastapi==0.104.1
-sqlalchemy==2.0.23
-uvicorn[standard]==0.24.0
-python-dotenv==1.0.0
-psycopg2-binary==2.9.11
-```
-
 ## 🧠 Endpoint
 
 ### `GET /price-history/{product_name}?months=12`
