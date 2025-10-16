@@ -6,8 +6,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    host: true, // Allows access from other devices on the network
-    open: true, // Automatically opens the browser
+    host: true, // Allow access from other devices on the network
+    open: true, // Automatically open the browser
     proxy: {
       '/api': {
         target: 'http://localhost:8000',

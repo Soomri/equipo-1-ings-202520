@@ -1,110 +1,39 @@
+# database.py
 """
-Database configuration module for SQLAlchemy connection management.
-
-This module establishes the database connection and provides essential
-components for ORM operations:
-- Database engine configuration
-- Session factory for database transactions
-- Base class for declarative ORM models
-- Dependency injection function for FastAPI
-
-The database URL is loaded from environment variables for secure configuration
-management across different deployment environments.
-
-Environment Variables:
-    DATABASE_URL: PostgreSQL connection string in the format:
-                 postgresql://user:password@host:port/database
+This module sets up the SQLAlchemy database connection and session for the application.
+- Loads environment variables using python-dotenv.
+- Retrieves the database URL from environment variables.
+- Creates a SQLAlchemy engine using the database URL.
+- Configures a session factory (`SessionLocal`) for database interactions.
+- Defines a base class (`Base`) for declarative ORM models.
 
 Usage:
-    # Creating database sessions
-    from database import SessionLocal
-    db = SessionLocal()
-
-    # Defining ORM models
-    from database import Base
-    class MyModel(Base):
-        __tablename__ = "my_table"
-
-    # FastAPI dependency injection
-    from database import get_db
-    @app.get("/items")
-    def read_items(db: Session = Depends(get_db)):
-        return db.query(Item).all()
+    Import `SessionLocal` to create database sessions.
+    Inherit from `Base` to define ORM models.
 """
 
-import os
-
-from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+import os
+from dotenv import load_dotenv
 
-
-# ===============================
-# ENVIRONMENT CONFIGURATION
-# ===============================
-
-# Load environment variables from .env file
+# Load environment variables
 load_dotenv()
 
-# Retrieve database URL from environment
+# Database URL from .env
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if not DATABASE_URL:
-    raise ValueError(
-        "DATABASE_URL environment variable is not set. "
-        "Please configure it in your .env file."
-    )
+# SQLAlchemy engine and session
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-
-# ===============================
-# DATABASE ENGINE & SESSION
-# ===============================
-
-# Create SQLAlchemy engine for database connection
-engine = create_engine(
-    DATABASE_URL,
-    echo=False,  # Set to True for SQL query logging during development
-    pool_pre_ping=True,  # Enable connection health checks
-)
-
-# Configure session factory for database operations
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
-
-# Base class for all ORM models
+# Base class for ORM models
 Base = declarative_base()
 
 
-# ===============================
-# DEPENDENCY FUNCTIONS
-# ===============================
-
 def get_db():
     """
-    Database session dependency for FastAPI endpoints.
-
-    Creates a new SQLAlchemy session for each request and ensures proper
-    cleanup after the request is completed. This function is designed to be
-    used with FastAPI's dependency injection system.
-
-    Yields:
-        Session: Active database session for executing queries.
-
-    Example:
-        >>> from fastapi import Depends
-        >>> from sqlalchemy.orm import Session
-        >>> 
-        >>> @app.get("/users")
-        >>> def get_users(db: Session = Depends(get_db)):
-        ...     return db.query(User).all()
-
-    Note:
-        The session is automatically closed in the finally block, ensuring
-        proper resource management even if an exception occurs during
-        request processing.
+    Dependency function to get a database session.
     """
     db = SessionLocal()
     try:

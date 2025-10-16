@@ -1,141 +1,47 @@
 """
-JWT token management module for authentication and authorization.
+JWT token management module.
 
-This module provides utilities for creating and verifying JSON Web Tokens (JWT)
-used for stateless authentication in the application. Tokens include expiration
-times, issuance timestamps, and unique identifiers for enhanced security.
+This module provides functionality to create and verify JWT access tokens
+for user authentication. It uses the Jose library for token encoding/decoding
+and includes security features like expiration times and unique token identifiers.
 
-Security Configuration:
-    All sensitive configuration (SECRET_KEY, ALGORITHM) must be stored in
-    environment variables, never hardcoded in source code.
-
-Environment Variables:
-    SECRET_KEY: Secret key for signing JWT tokens (keep this secure!)
-    ALGORITHM: JWT signing algorithm (e.g., "HS256")
-    ACCESS_TOKEN_EXPIRE_MINUTES: Default token lifetime in minutes
-
-Usage:
-    # Creating a token
-    from jwt_manager import create_access_token
-    token = create_access_token(data={"sub": "user@example.com"})
-
-    # Verifying a token
-    from jwt_manager import verify_token
-    try:
-        payload = verify_token(token)
-        user_email = payload["sub"]
-    except JWTError:
-        # Handle invalid token
-        pass
+Security Note:
+    Keep SECRET_KEY and other sensitive configuration out of source code.
+    Always use environment variables in production environments.
 """
 
-import os
 from datetime import datetime, timedelta
-from typing import Optional
+from jose import JWTError, jwt
+import os
+from dotenv import load_dotenv
 from uuid import uuid4
 
-from dotenv import load_dotenv
-from jose import JWTError, jwt
-
-
-# ===============================
-# ENVIRONMENT CONFIGURATION
-# ===============================
-
-# Load environment variables from .env file
 load_dotenv()
 
-# JWT configuration from environment variables
+# Get secret and algorithm from environment (fallback values for local dev)
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(
-    os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
-)
-
-# Validate required configuration
-if not SECRET_KEY:
-    raise ValueError(
-        "SECRET_KEY environment variable is not set. "
-        "JWT tokens cannot be created without a secret key."
-    )
-
-if not ALGORITHM:
-    raise ValueError(
-        "ALGORITHM environment variable is not set. "
-        "Please configure it in your .env file (e.g., 'HS256')."
-    )
+# Default token lifetime in minutes
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 
-# ===============================
-# TOKEN MANAGEMENT FUNCTIONS
-# ===============================
-
-def create_access_token(
-    data: dict,
-    expires_delta: Optional[timedelta] = None
-) -> str:
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     """
-    Create a signed JWT access token with expiration and unique identifier.
-
-    Generates a JSON Web Token containing the provided payload data along
-    with standard JWT claims (expiration, issued at, JWT ID). The token
-    is signed using the configured secret key and algorithm.
-
-    Token Claims:
-        - exp: Expiration timestamp (Unix timestamp)
-        - iat: Issued at timestamp (Unix timestamp)
-        - jti: Unique JWT identifier (UUID4)
-        - (custom): Any data provided in the `data` parameter
-
+    Create a signed JWT token with an expiration time.
     Args:
-        data (dict): Payload data to include in the token.
-                    Typically contains user identification like:
-                    {"sub": "user@example.com", "rol": "admin"}
-        expires_delta (Optional[timedelta]): Custom token lifetime.
-                                            If None, uses the default from
-                                            ACCESS_TOKEN_EXPIRE_MINUTES.
-
+        data (dict): payload data to include (e.g. {"sub": user_email, "rol": "usuario"})
+        expires_delta (timedelta | None): how long the token is valid
     Returns:
-        str: Encoded JWT token string ready for transmission.
-
-    Example:
-        >>> token_data = {"sub": "user@example.com", "rol": "user"}
-        >>> token = create_access_token(data=token_data)
-        >>> print(token)
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-
-        >>> # Custom expiration (5 minutes)
-        >>> token = create_access_token(
-        ...     data=token_data,
-        ...     expires_delta=timedelta(minutes=5)
-        ... )
-
-    Security Note:
-        - Never expose the SECRET_KEY in logs or error messages
-        - Use HTTPS to prevent token interception
-        - Store tokens securely on the client side
+        str: encoded JWT
     """
-    # Create a copy to avoid modifying the original data
     to_encode = data.copy()
-
-    # Calculate expiration time
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(
-            minutes=ACCESS_TOKEN_EXPIRE_MINUTES
-        )
-
-    # Add standard JWT claims
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({
-        "exp": expire,               # Expiration time
-        "iat": datetime.utcnow(),    # Issued at timestamp
-        "jti": str(uuid4())          # Unique token identifier
+        "exp": expire,              # Expiration time of the token
+        "iat": datetime.utcnow(),   # Issued at: when the token was created
+        "jti": str(uuid4())         # Unique token identifier to ensure each token is distinct
     })
-
-    # Encode and sign the token
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    
     return encoded_jwt
 
 
@@ -143,48 +49,41 @@ def verify_token(token: str) -> dict:
     """
     Verify and decode a JWT token.
 
-    Validates the token signature, checks expiration, and returns the
-    decoded payload if valid. This function does not handle exceptions;
-    callers must catch JWTError for proper error handling.
+    This function validates the token signature, checks expiration, and
+    decodes the payload. It ensures the token hasn't been tampered with
+    and is still valid.
 
     Args:
-        token (str): JWT token string to verify and decode.
+        token (str): The JWT token string to verify and decode.
 
     Returns:
-        dict: Decoded token payload containing all claims.
-              Standard claims include:
-              - sub: Subject (typically user identifier)
-              - exp: Expiration timestamp
-              - iat: Issued at timestamp
-              - jti: JWT unique identifier
+        dict: Decoded token payload containing all claims and custom data.
+            Includes standard claims (sub, exp, iat, jti) and any custom
+            fields that were added during token creation.
 
     Raises:
-        JWTError: If token is invalid, expired, or signature verification
-                 fails. Specific exceptions include:
-                 - ExpiredSignatureError: Token has expired
-                 - JWTClaimsError: Invalid claims (e.g., wrong audience)
-                 - JWTDecodeError: Malformed token
+        JWTError: If the token is invalid, expired, or has been tampered with.
+            Possible reasons include:
+            - Invalid signature
+            - Expired token (past exp claim)
+            - Malformed token structure
+            - Algorithm mismatch
 
     Example:
-        >>> from jose import JWTError
-        >>> 
+        >>> token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
         >>> try:
         ...     payload = verify_token(token)
-        ...     user_email = payload.get("sub")
-        ...     user_role = payload.get("rol")
+        ...     print(payload["sub"])
         ... except JWTError:
-        ...     raise HTTPException(
-        ...         status_code=401,
-        ...         detail="Invalid or expired token"
-        ...     )
+        ...     print("Invalid or expired token")
 
-    Security Note:
-        Always validate the token before trusting its contents.
-        Check for required claims (like "sub") after verification.
+    Note:
+        The caller is responsible for handling JWTError exceptions,
+        typically by returning an HTTP 401 Unauthorized response.
     """
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except JWTError as e:
-        # Re-raise to let caller handle (e.g., return 401 Unauthorized)
+        # Let caller handle the exception (e.g., raise HTTPException)
         raise e

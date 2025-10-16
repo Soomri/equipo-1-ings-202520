@@ -1,78 +1,42 @@
 """
-SQLAlchemy ORM models for the Market Prices Plaze application.
+SQLAlchemy ORM models module.
 
-This module defines the database schema using SQLAlchemy's declarative base.
-Models are organized into two main categories:
-- User-related models: Authentication and password recovery
-- Market-related models: Products, markets, and price data
+This module defines all database models for the Market Prices Plaze API,
+including user management, email verification, and market price tracking.
+Models are organized into two main categories: user-related and market-related.
 
-Database Schema:
-    The schema maintains Spanish column names to match the existing database
-    structure, ensuring compatibility with legacy systems and data.
-
-Relationships:
-    - User ↔ EmailLink: One-to-many (user can have multiple recovery links)
-    - Price ↔ Producto: Many-to-one (multiple prices per product)
-    - Price ↔ PlazaMercado: Many-to-one (multiple prices per market)
-
-Usage:
-    from models import User, Price, Producto
-    from database import SessionLocal
-
-    db = SessionLocal()
-    user = db.query(User).filter(User.correo == "user@example.com").first()
+Note:
+    Column names in Spanish are maintained to match the existing database schema.
 """
-
-from datetime import datetime
 
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Date, DECIMAL, ForeignKey
 from sqlalchemy.orm import relationship
-
 from database import Base
+from datetime import datetime
 
-
-# ===============================
-# USER-RELATED MODELS
-# ===============================
-
+# ==========================
+# 👤 User-related models
+# ==========================
 class User(Base):
     """
-    User account model for authentication and authorization.
+    ORM model for the users table.
 
-    Stores user credentials, roles, and account security information including
-    failed login attempt tracking and temporary account locks.
+    This model represents registered users in the system, including their
+    authentication credentials, role assignments, and account security status.
 
     Attributes:
         usuario_id (int): Primary key, unique user identifier.
         nombre (str): User's full name.
-        correo (str): User's email address (unique, indexed for fast lookups).
-        contrasena_hash (str): Argon2 hashed password.
-        rol (str): User role ("usuario" or "admin"). Default: "usuario".
-        intentos_fallidos (int): Count of consecutive failed login attempts.
-                                Default: 0.
-        cuenta_bloqueada_hasta (datetime): Timestamp until which account is
-                                          locked. None if not locked.
+        correo (str): User's email address (unique, indexed).
+        contrasena_hash (str): Hashed password using Argon2.
+        rol (str): User role, defaults to "usuario". Can be "admin" or "usuario".
+        intentos_fallidos (int): Count of failed login attempts, defaults to 0.
+        cuenta_bloqueada_hasta (datetime): Timestamp until account is locked,
+            None if not locked.
+        enlaces (relationship): One-to-many relationship with EmailLink model.
 
     Relationships:
-        enlaces (List[EmailLink]): Password recovery and verification links
-                                   associated with this user.
-
-    Table:
-        usuarios
-
-    Indexes:
-        - usuario_id (primary key)
-        - correo (unique index for fast email lookups)
-
-    Example:
-        >>> user = User(
-        ...     nombre="John Doe",
-        ...     correo="john@example.com",
-        ...     contrasena_hash=argon2.hash("password123"),
-        ...     rol="usuario"
-        ... )
-        >>> db.add(user)
-        >>> db.commit()
+        enlaces: List of email verification/recovery links associated with this user.
     """
     __tablename__ = "usuarios"
 
@@ -80,57 +44,34 @@ class User(Base):
     nombre = Column(String, nullable=False)
     correo = Column(String, unique=True, index=True, nullable=False)
     contrasena_hash = Column(String, nullable=False)
-    rol = Column(String, default="usuario")
+    rol = Column(String, default="usuario")  # e.g. "usuario" or "admin"
     intentos_fallidos = Column(Integer, default=0)
     cuenta_bloqueada_hasta = Column(DateTime, nullable=True)
 
-    # Relationships
     enlaces = relationship("EmailLink", back_populates="user")
 
 
 class EmailLink(Base):
     """
-    Email verification and password recovery link model.
+    ORM model for email verification and password recovery links.
 
-    Stores time-limited, single-use tokens for password recovery and email
-    verification workflows. Links automatically expire after a set duration.
+    This model stores temporary links sent to users for email verification
+    or password recovery purposes. Links have expiration times and can only
+    be used once.
 
     Attributes:
         enlace_id (int): Primary key, unique link identifier.
-        usuario_id (int): Foreign key to usuarios table.
-        enlace_url (str): Unique token/URL for the recovery link (max 500 chars).
-        tipo (str): Link type identifier (e.g., "password_recovery",
-                   "email_verification"). Max 30 characters.
-        expira_en (datetime): Expiration timestamp (typically 1 hour from
-                             creation).
-        usado (bool): Whether the link has been used. Default: False.
-        fecha_creacion (datetime): Link creation timestamp. Auto-set to UTC now.
+        usuario_id (int): Foreign key referencing the user.
+        enlace_url (str): Unique URL string for the link (max 500 chars).
+        tipo (str): Link type, e.g., "password_recovery" or "email_verification"
+            (max 30 chars).
+        expira_en (datetime): Expiration timestamp for the link.
+        usado (bool): Whether the link has been used, defaults to False.
+        fecha_creacion (datetime): Link creation timestamp, defaults to UTC now.
+        user (relationship): Many-to-one relationship with User model.
 
     Relationships:
-        user (User): The user account this link belongs to.
-
-    Table:
-        enlaces_correo
-
-    Indexes:
-        - enlace_id (primary key)
-        - enlace_url (unique for token validation)
-
-    Security Notes:
-        - Links should expire within 1 hour for security
-        - Links can only be used once (checked via 'usado' flag)
-        - Tokens should be cryptographically random (e.g., UUID4)
-
-    Example:
-        >>> from datetime import timedelta
-        >>> link = EmailLink(
-        ...     usuario_id=user.usuario_id,
-        ...     enlace_url=str(uuid4()),
-        ...     tipo="password_recovery",
-        ...     expira_en=datetime.utcnow() + timedelta(hours=1)
-        ... )
-        >>> db.add(link)
-        >>> db.commit()
+        user: The user who owns this email link.
     """
     __tablename__ = "enlaces_correo"
 
@@ -142,58 +83,33 @@ class EmailLink(Base):
     usado = Column(Boolean, default=False)
     fecha_creacion = Column(DateTime, default=datetime.utcnow)
 
-    # Relationships
     user = relationship("User", back_populates="enlaces")
 
 
-# ===============================
-# MARKET-RELATED MODELS
-# ===============================
-
+# ==========================
+# 🏪 Market-related models
+# ==========================
 class Price(Base):
     """
-    Product price record model.
+    ORM model for product prices at different markets.
 
-    Stores historical price data for products at specific market plazas.
-    Each record represents the price per kilogram of a product at a
-    particular market on a specific date.
+    This model tracks historical and current prices of products across
+    various market locations, enabling price comparison and trend analysis.
 
     Attributes:
         price_id (int): Primary key, unique price record identifier.
-        product_id (int): Foreign key to productos table.
-        market_id (int): Foreign key to plazas_mercado table.
-        price_per_kg (Decimal): Price per kilogram in Colombian Pesos (COP).
-                               Precision: 10 digits, 2 decimal places.
-        date (date): Date when this price was recorded.
+        product_id (int): Foreign key referencing the product.
+        market_id (int): Foreign key referencing the market location.
+        price_per_kg (Decimal): Price per kilogram with 2 decimal precision.
+        date (Date): Date when this price was recorded.
+        producto (relationship): Many-to-one relationship with Producto model.
+        plaza (relationship): Many-to-one relationship with PlazaMercado model.
 
     Relationships:
-        producto (Producto): The product this price belongs to.
-        plaza (PlazaMercado): The market plaza where this price applies.
-
-    Table:
-        precios
-
-    Indexes:
-        - price_id (primary key)
-
-    Data Integrity:
-        - Combination of (product_id, market_id, date) should typically
-          be unique to avoid duplicate price entries
-        - Prices are stored as DECIMAL for precise financial calculations
-
-    Example:
-        >>> from decimal import Decimal
-        >>> from datetime import date
-        >>> 
-        >>> price = Price(
-        ...     product_id=1,
-        ...     market_id=2,
-        ...     price_per_kg=Decimal("2500.00"),
-        ...     date=date.today()
-        ... )
-        >>> db.add(price)
-        >>> db.commit()
+        producto: The product associated with this price.
+        plaza: The market where this price was recorded.
     """
+
     __tablename__ = "precios"
 
     price_id = Column(Integer, primary_key=True, index=True)
@@ -202,82 +118,55 @@ class Price(Base):
     price_per_kg = Column(DECIMAL(10, 2), nullable=False)
     date = Column(Date, nullable=False)
 
-    # Relationships
     producto = relationship("Producto", back_populates="precios")
     plaza = relationship("PlazaMercado", back_populates="precios")
 
 
 class PlazaMercado(Base):
     """
-    Market plaza model.
+    ORM model for market locations.
 
-    Represents physical market locations in Colombian cities where
-    agricultural products are sold.
+    This model represents physical market locations where products are sold.
+    Each market can have multiple price records for different products.
 
     Attributes:
         plaza_id (int): Primary key, unique market identifier.
-        nombre (str): Market name (e.g., "Minorista", "La América").
-        ciudad (str): City where the market is located (e.g., "Medellín").
+        nombre (str): Market name.
+        ciudad (str): City where the market is located.
+        precios (relationship): One-to-many relationship with Price model.
 
     Relationships:
-        precios (List[Price]): All price records for products sold in
-                              this market plaza.
-
-    Table:
-        plazas_mercado
-
-    Indexes:
-        - plaza_id (primary key)
-
-    Example:
-        >>> plaza = PlazaMercado(
-        ...     nombre="Plaza Minorista",
-        ...     ciudad="Medellín"
-        ... )
-        >>> db.add(plaza)
-        >>> db.commit()
+        precios: List of all price records for this market.
     """
+
     __tablename__ = "plazas_mercado"
 
     plaza_id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, nullable=False)
     ciudad = Column(String, nullable=False)
 
-    # Relationships
     precios = relationship("Price", back_populates="plaza")
 
 
 class Producto(Base):
     """
-    Agricultural product model.
+    ORM model for products catalog.
 
-    Represents individual products available in Medellín market plazas,
-    such as vegetables, fruits, and other agricultural goods.
+    This model represents individual products that are tracked across
+    different markets. Product names are unique to prevent duplicates.
 
     Attributes:
         producto_id (int): Primary key, unique product identifier.
-        nombre (str): Product name in Spanish (unique across system).
+        nombre (str): Product name (unique).
+        precios (relationship): One-to-many relationship with Price model.
 
     Relationships:
-        precios (List[Price]): All price records for this product across
-                              different markets and dates.
-
-    Table:
-        productos
-
-    Indexes:
-        - producto_id (primary key)
-        - nombre (unique for product name validation)
-
-    Example:
-        >>> producto = Producto(nombre="Tomate chonto")
-        >>> db.add(producto)
-        >>> db.commit()
+        precios: List of all price records for this product across markets.
     """
+    
     __tablename__ = "productos"
 
     producto_id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, unique=True, nullable=False)
 
-    # Relationships
     precios = relationship("Price", back_populates="producto")

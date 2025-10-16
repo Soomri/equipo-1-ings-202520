@@ -1,66 +1,76 @@
-# main.py
+"""
+Main application module for Market Prices Plaze API.
+
+This module initializes the FastAPI application, configures CORS middleware,
+creates database tables, and registers all API routers for different
+functional domains (authentication, prices, health checks, etc.).
+"""
+
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware  # CORS middleware for cross-origin requests
+from routers_.user_registration import router as user_registration_router
 from routers_ import auth, password_recovery
-from routers.prices import router as prices_router
+from routers_.prices import router as prices_router
 from database import Base, engine
 from dotenv import load_dotenv
+from routers_.health_routes import router as health_router
+from routers_.maintenance_routes import router as maintenance_router
 
-
-# ===============================
-# ENVIRONMENT & DATABASE SETUP
-# ===============================
-
-# Load environment variables from .env file
+# Load environment variables
 load_dotenv()
 
-# Create all database tables if they don't exist
-# This runs synchronously on application startup
+# Create tables if they do not exist
 Base.metadata.create_all(bind=engine)
-
-
-# ===============================
-# APPLICATION INITIALIZATION
-# ===============================
 
 app = FastAPI(title="Market Prices Plaze API 🛒")
 
-# ===============================
-# ROUTER REGISTRATION
-# ===============================
+# ========================================
+# CORS Configuration
+# ========================================
+# Enable Cross-Origin Resource Sharing (CORS) to allow frontend requests
+# This is required for the React frontend to communicate with the API
+# Allowed origins include common development ports (3000, 5173)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",      # Create React App default port
+        "http://localhost:5173",      # Vite default port
+        "http://127.0.0.1:3000",      # Alternative localhost notation
+        "http://127.0.0.1:5173",      # Alternative localhost notation (Vite)
+    ],
+    allow_credentials=True,           # Allow cookies and authentication headers
+    allow_methods=["*"],              # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],              # Allow all headers (including Authorization)
+)
 
-# Authentication endpoints (login, logout)
+# Include routers
+app.include_router(user_registration_router)
 app.include_router(auth.router, tags=["Auth"])
-
-# Password recovery endpoints (request reset, reset password)
 app.include_router(password_recovery.router, tags=["Password Recovery"])
-
-# Price query endpoints (latest prices, products, markets)
 app.include_router(prices_router, tags=["Prices"])
-
-# ===============================
-# ROOT ENDPOINT
-# ===============================
+app.include_router(health_router)
+app.include_router(maintenance_router)
 
 @app.get("/")
 def root():
     """
-    Check the endpoint for API status verification.
+    Root endpoint of the API.
 
-    This endpoint provides a simple way to verify that the API is running
-    and accessible. Useful for monitoring systems, load balancers, and
-    integration tests.
+    This endpoint serves as a simple health check and welcome message
+    for the Market Prices Plaze API. It confirms that the application
+    is running and accessible.
 
     Returns:
-        dict: Status message with the following field:
-            - message (str): Confirmation that API is operational.
+        dict: A dictionary containing:
+            - message (str): Confirmation message that the API is operational.
 
     Example:
-        >>> import requests
-        >>> response = requests.get("http://localhost:8000/")
-        >>> print(response.json())
-        {"message": "API funcionando 🚀"}
+        >>> response = root()
+        >>> print(response)
+        {'message': 'API funcionando 🚀'}
 
-    Status Codes:
-        200: API is running normally
+    Note:
+        This endpoint does not require authentication and can be used
+        for basic connectivity testing.
     """
     return {"message": "API funcionando 🚀"}

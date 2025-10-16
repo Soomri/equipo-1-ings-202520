@@ -23,20 +23,13 @@ Usage:
     send_lock_email("user@example.com", "John Doe")
 """
 
-import os
-import smtplib
-from email.mime.text import MIMEText
-
 from sqlalchemy.orm import Session
-
 from database import get_db
 from models import User
+import smtplib
+from email.mime.text import MIMEText
 from utils.password_utils import create_password_recovery_link
-
-
-# ===============================
-# EMAIL NOTIFICATION FUNCTIONS
-# ===============================
+import os
 
 def send_lock_email(email: str, user_name: str):
     """
@@ -144,12 +137,10 @@ def send_lock_email(email: str, user_name: str):
     </html>
     """, "html")
 
-    # Prepare email message
     msg["Subject"] = "❌ Cuenta bloqueada temporalmente"
     msg["From"] = f"Plaze Soporte <{os.getenv('EMAIL_USER')}>"
     msg["To"] = email
 
-    # Send email via Gmail SMTP
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(os.getenv("EMAIL_USER"), os.getenv("EMAIL_PASS"))
@@ -158,5 +149,7 @@ def send_lock_email(email: str, user_name: str):
     except Exception as e:
         print(f"Error al enviar el correo de bloqueo: {e}")
     finally:
-        # Always close the database session
         db.close()
+
+
+
