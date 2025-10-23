@@ -132,24 +132,39 @@ const PasswordRecoveryPage = () => {
 
             <form onSubmit={handleSubmit} style={{ width: '100%' }}>
               {/* Email input field */}
-              <input
-                type="email"
-                placeholder="Correo electrónico"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-                style={{
-                  width: '100%',
-                  height: '65px',
-                  backgroundColor: 'rgba(217, 217, 217, 0.5)',
-                  border: '1px solid #000000',
-                  borderRadius: '4px',
-                  padding: '0 15px',
-                  fontSize: '18px',
-                  marginBottom: '20px',
-                  opacity: isLoading ? 0.6 : 1
-                }}
-              />
+              <div style={{ marginBottom: '20px' }}>
+                <label 
+                  htmlFor="recovery-email-input"
+                  style={{
+                    display: 'block',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    marginBottom: '8px',
+                    color: '#333'
+                  }}
+                >
+                  Correo electrónico
+                </label>
+                <input
+                  id="recovery-email-input"
+                  type="email"
+                  placeholder="Correo electrónico"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  style={{
+                    width: '100%',
+                    height: '65px',
+                    backgroundColor: 'rgba(217, 217, 217, 0.5)',
+                    border: '1px solid #000000',
+                    borderRadius: '4px',
+                    padding: '0 15px',
+                    fontSize: '18px',
+                    color: '#1a1a1a',
+                    opacity: isLoading ? 0.6 : 1
+                  }}
+                />
+              </div>
 
               {/* Error message */}
               {error && (

@@ -60,46 +60,110 @@ const ProductSearch = () => {
   return (
     <div className="bg-white rounded-lg p-10 mx-auto shadow-lg" style={{ width: '1100px' }}>
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Search Input with Filter Icon */}
-        <div className="flex items-center justify-center mb-8">
-          <div className="flex items-center" style={{ width: '600px' }}>
-            <input
-              type="text"
-              value={searchData.product}
-              onChange={(e) => handleInputChange('product', e.target.value)}
-              placeholder="Buscar producto (ej: Tomate, Papa criolla...)"
-              className="border border-gray-300 text-xl focus:outline-none focus:ring-2 focus:ring-primary-color focus:border-transparent"
-              style={{ 
-                borderRadius: '12px 0 0 12px',
-                width: '540px',
-                flex: 'none',
-                paddingLeft: '24px',
-                paddingRight: '24px',
-                paddingTop: '10px',
-                paddingBottom: '10px'
-              }}
-              required
-            />
-            <button 
-              type="button"
-              onClick={toggleFilters}
-              className="px-6 border border-l-0 border-gray-300 hover:bg-gray-100 flex items-center justify-center transition-colors"
-              style={{ 
-                borderRadius: '0 12px 12px 0',
-                width: '60px',
-                flex: 'none',
-                paddingTop: '10px',
-                paddingBottom: '10px',
-                backgroundColor: showFilters ? '#4CA772' : 'transparent'
-              }}
-            >
-              {showFilters ? (
-                <X className="w-7 h-7" style={{ color: 'white' }} />
-              ) : (
-                <Filter className="w-7 h-7 text-gray-600" />
-              )}
-            </button>
-          </div>
+        {/* Filter Button - Above Search, Aligned Left */}
+        <div className="flex items-center gap-3" style={{ marginLeft: '225px', marginBottom: '20px' }}>
+          <button 
+            type="button"
+            onClick={toggleFilters}
+            className="flex items-center gap-2 transition-all"
+            style={{ 
+              padding: '8px 18px',
+              borderRadius: '8px',
+              border: searchData.plaza ? '2px solid #4CA772' : (showFilters ? '1px solid #4CA772' : '1px solid #ddd'),
+              backgroundColor: searchData.plaza ? '#4CA772' : (showFilters ? '#E8F5E9' : 'transparent'),
+              color: searchData.plaza ? '#FFFFFF' : (showFilters ? '#2E7D32' : '#666'),
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              boxShadow: searchData.plaza ? '0 2px 8px rgba(76, 167, 114, 0.3)' : 'none'
+            }}
+          >
+            {showFilters ? (
+              <>
+                <X className="w-4 h-4" />
+                Ocultar filtros
+              </>
+            ) : (
+              <>
+                <Filter className="w-4 h-4" />
+                Filtrar por plazas
+                {searchData.plaza && (
+                  <span style={{
+                    backgroundColor: '#FFFFFF',
+                    color: '#4CA772',
+                    borderRadius: '50%',
+                    width: '20px',
+                    height: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    marginLeft: '4px'
+                  }}>
+                    1
+                  </span>
+                )}
+              </>
+            )}
+          </button>
+          
+          {/* Active Filter Badge */}
+          {searchData.plaza && !showFilters && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '6px 12px',
+              backgroundColor: '#E8F5E9',
+              border: '1px solid #4CA772',
+              borderRadius: '20px',
+              fontSize: '13px',
+              color: '#2E7D32',
+              fontWeight: '500'
+            }}>
+              <Store className="w-4 h-4" />
+              <span>{searchData.plaza}</span>
+              <button
+                type="button"
+                onClick={clearFilters}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '0',
+                  marginLeft: '4px'
+                }}
+                title="Quitar filtro"
+              >
+                <X className="w-4 h-4" style={{ color: '#F57C00' }} />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Search Input - Centered */}
+        <div className="flex flex-col items-center mb-6">
+          <input
+            type="text"
+            value={searchData.product}
+            onChange={(e) => handleInputChange('product', e.target.value)}
+            placeholder="Buscar producto (ej: Tomate, Papa criolla...)"
+            className="border border-gray-300 text-xl focus:outline-none focus:ring-2 focus:ring-primary-color focus:border-transparent"
+            style={{ 
+              borderRadius: '12px',
+              width: '650px',
+              paddingLeft: '24px',
+              paddingRight: '24px',
+              paddingTop: '12px',
+              paddingBottom: '12px',
+              color: '#1a1a1a',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+            }}
+            required
+          />
         </div>
 
         {/* Advanced Filters Section */}
@@ -108,17 +172,21 @@ const ProductSearch = () => {
             style={{
               backgroundColor: '#f9f9f9',
               borderRadius: '12px',
-              padding: '1.5rem',
+              padding: '2rem',
+              marginTop: '1rem',
               marginBottom: '1rem',
-              border: '2px solid #4CA772',
+              border: '1px solid #e0e0e0',
+              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
               animation: 'slideDown 0.3s ease-out'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#4CA772', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Store className="w-5 h-5" />
-                Filtros Avanzados
-              </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Store className="w-6 h-6" style={{ color: '#4CA772' }} />
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#333', margin: 0 }}>
+                  Filtrar por plaza de mercado
+                </h3>
+              </div>
               {searchData.plaza && (
                 <button
                   type="button"
@@ -126,13 +194,18 @@ const ProductSearch = () => {
                   style={{
                     fontSize: '0.875rem',
                     color: '#F57C00',
-                    textDecoration: 'underline',
                     background: 'none',
                     border: 'none',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    fontWeight: '500',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
                   }}
                 >
-                  Limpiar filtros
+                  <X className="w-4 h-4" />
+                  Limpiar filtro
                 </button>
               )}
             </div>
@@ -143,13 +216,13 @@ const ProductSearch = () => {
                 htmlFor="plaza-select"
                 style={{ 
                   display: 'block',
-                  fontSize: '0.875rem',
+                  fontSize: '0.9rem',
                   fontWeight: '500',
-                  marginBottom: '0.5rem',
+                  marginBottom: '0.75rem',
                   color: '#555'
                 }}
               >
-                Plaza de Mercado (Opcional)
+                Selecciona una plaza específica (opcional):
               </label>
               <select
                 id="plaza-select"
@@ -157,16 +230,20 @@ const ProductSearch = () => {
                 onChange={(e) => handleInputChange('plaza', e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '0.75rem 1rem',
-                  border: '1px solid #ddd',
+                  padding: '0.85rem 1rem',
+                  border: '2px solid #ddd',
                   borderRadius: '8px',
                   fontSize: '1rem',
                   backgroundColor: 'white',
                   cursor: 'pointer',
-                  outline: 'none'
+                  outline: 'none',
+                  transition: 'border-color 0.2s',
+                  color: '#333'
                 }}
+                onFocus={(e) => e.target.style.borderColor = '#4CA772'}
+                onBlur={(e) => e.target.style.borderColor = '#ddd'}
               >
-                <option value="">Todas las plazas</option>
+                <option value="">🏪 Todas las plazas de mercado</option>
                 {plazas.map((plaza) => (
                   <option key={plaza.id} value={plaza.nombre}>
                     {plaza.nombre} - {plaza.ciudad}

@@ -194,14 +194,15 @@ const LandingPage = () => {
         </div>
 
         {/* About section */}
-        <div style={{
+        <div id="acerca-de-plaze" style={{
           width: '1008px',
           height: '480px',
           backgroundColor: '#FEEAA9',
           borderRadius: '72px',
           marginTop: '44px',
           position: 'relative',
-          padding: '21px 34px 42px 34px'
+          padding: '21px 34px 42px 34px',
+          scrollMarginTop: '120px'
         }}>
           {/* Section title */}
           <h3 style={{
@@ -273,14 +274,15 @@ const LandingPage = () => {
         </div>
 
         {/* Team section */}
-        <div style={{
+        <div id="quienes-somos" style={{
           width: '1008px',
           backgroundColor: '#F6D182',
           borderRadius: '72px',
           marginTop: '72px',
           padding: '43px 58px',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          scrollMarginTop: '120px'
         }}>
           {/* Section title */}
           <h3 style={{
@@ -352,13 +354,14 @@ const LandingPage = () => {
           marginBottom: '72px'
         }}>
           {/* Terms box */}
-          <div style={{
+          <div id="terminos-condiciones" style={{
             flex: 1,
             backgroundColor: '#D49A1D',
             borderRadius: '72px',
             padding: '43px 36px',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            scrollMarginTop: '120px'
           }}>
             <h3 style={{
               fontSize: '35px',
@@ -380,13 +383,14 @@ const LandingPage = () => {
           </div>
 
           {/* Data source box */}
-          <div style={{
+          <div id="fuente-datos" style={{
             flex: 1,
             backgroundColor: '#D49A1D',
             borderRadius: '72px',
             padding: '43px 36px',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            scrollMarginTop: '120px'
           }}>
             <h3 style={{
               fontSize: '35px',
