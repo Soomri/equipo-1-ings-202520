@@ -86,7 +86,8 @@ Dataset Selection Log:
 
 **Objective**: Ensure data quality before integration into our time series prediction model.
 
-python```
+python
+```
 - Remove rows with null/missing values in critical fields
 - Validate date formats and consistency
 - Check for duplicate records
