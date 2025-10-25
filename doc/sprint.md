@@ -23,3 +23,6 @@
 
 > ### Diagrama burndown
 ![Diagrama burndown viernes 3 octubre](images_sprint/Burndown_24oct.png)
+
+> ### Estado del tablero
+![Tablero backlog viernes 10 octubre](images_sprint/Backlog_24oct.png)
