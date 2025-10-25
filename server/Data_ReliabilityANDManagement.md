@@ -1,5 +1,39 @@
 # NF-08 – Data Reliability and Quality Management
 
+## 📑 Table of Contents
+
+| Section | Description |
+|---------|-------------|
+| [📋 Overview](#-overview) | Document purpose and scope |
+| [🎯 Objective](#-objective) | Primary goals and requirements |
+| [🏛️ Primary Data Source: DANE](#️-primary-data-source-dane) | Official data source information |
+| [🔄 Data Management Workflow](#-data-management-workflow) | Complete data lifecycle process |
+| [📊 Data Traceability and Audit Trail](#-data-traceability-and-audit-trail) | Data lineage and tracking |
+| [✅ Quality Assurance Measures](#-quality-assurance-measures) | Quality control and metrics |
+| [🔮 Future Enhancements](#-future-enhancements) | Long-term improvements |
+| [📚 References and Resources](#-references-and-resources) | External links and documentation |
+| [📝 Document Control](#-document-control) | Version control and maintenance |
+
+### Detailed Navigation
+
+| Subsection | Description |
+|------------|-------------|
+| [Why DANE?](#why-dane) | Rationale for choosing DANE as data source |
+| [DANE's Legal Framework](#danes-legal-framework-and-data-access-limitations) | Legal restrictions and compliance |
+| [Data Source Selection](#1-data-source-selection-monthly) | Monthly data acquisition process |
+| [Data Cleaning and Validation](#2-data-cleaning-and-validation) | Quality assurance procedures |
+| [Manual Data Migration](#3-manual-data-migration-monthly) | Monthly migration workflow |
+| [Migration Schedule](#31-migration-schedule) | Timeline and calendar |
+| [Migration Process](#32-migration-process) | Step-by-step migration procedures |
+| [Data Lineage](#data-lineage) | Data traceability information |
+| [Acceptance Criteria Compliance](#acceptance-criteria-compliance) | Requirement fulfillment status |
+| [Data Quality Metrics](#data-quality-metrics) | KPIs and thresholds |
+| [Medium-term Enhancements](#medium-term-6-12-months) | Near-future improvements |
+| [Long-term Vision](#long-term-vision) | Future API integration plans |
+| [Official Sources](#official-sources) | External references and links |
+
+---
+
 ## 📋 Overview
 
 This document describes how our project implements the non-functional requirement NF-08, which ensures that all displayed information comes from verified sources and remains up-to-date to guarantee that user decisions are based on reliable data.
@@ -59,15 +93,15 @@ Our data management process follows a structured monthly cycle aligned with DANE
 **Responsibility**: Data Engineering Team
 
 **Process**:
-1. Access DANE's official website: [https://www.dane.gov.co](https://www.dane.gov.co)
-2. Navigate to SIPSA (Sistema de Información de Precios y Abastecimiento del Sector Agropecuario)
-3. Review available monthly reports for food prices
+1. Access the DANE SIPSA dataset directly at: [https://www.dane.gov.co/index.php/estadisticas-por-tema/agropecuario/sistema-de-informacion-de-precios-sipsa/mayoristas-boletin-mensual-1](https://www.dane.gov.co/index.php/estadisticas-por-tema/agropecuario/sistema-de-informacion-de-precios-sipsa/mayoristas-boletin-mensual-1)
+2. Navigate to the monthly food price reports section within the SIPSA dataset
+3. Review and select the most recent monthly report for food prices
 4. Identify and download relevant datasets containing:
-   - Food product names
-   - Prices (minimum, maximum, average)
-   - Markets and cities
-   - Collection dates
-   - Measurement units
+   - Price update date
+   - Product name
+   - Product category
+   - Market name
+   - Price per kilogram
 
 **Quality Criteria**:
 - ✅ Dataset is from the current or previous month
@@ -99,7 +133,7 @@ python
 **Critical Fields Requiring No Null Values**:
 - `product_name` 
 - `price` 
-- `market` 
+- `market` and `city`
 - `city` 
 
 
@@ -136,64 +170,13 @@ Production Deployment: 20th day of each month
 
 **Migration Steps**:
 
-1. **Backup Current Data**:
-   ```sql
-   -- Create timestamped backup
-   CREATE TABLE precios_sipsa_backup_YYYYMMDD AS 
-   SELECT * FROM precios_sipsa;
-   ```
-
-2. **Execute Migration Script**:
-   ```bash
-   python migration/dane_monthly_import.py \
-     --dataset data/dane_YYYYMM.csv \
-     --validate \
-     --log-level INFO
-   ```
-
-3. **Validate Migration**:
-   ```sql
-   -- Verify record counts
-   SELECT COUNT(*) FROM precios_sipsa 
-   WHERE fecha_carga >= CURRENT_DATE;
+1. Backup Current Data
+  
+2. Execute Migration by manually importing the cleaned DANE dataset directly into the database 
    
-   -- Check for duplicates
-   SELECT fecha_registro, producto, mercado, ciudad, COUNT(*) 
-   FROM precios_sipsa 
-   GROUP BY fecha_registro, producto, mercado, ciudad 
-   HAVING COUNT(*) > 1;
-   ```
+3. Validate Migration
+   
 
-4. **Update Metadata**:
-   ```sql
-   UPDATE fuentes_datos 
-   SET fecha_ultima_actualizacion = CURRENT_TIMESTAMP,
-       fecha_proxima_actualizacion = CURRENT_TIMESTAMP + INTERVAL '1 month'
-   WHERE nombre_fuente = 'DANE-SIPSA';
-   ```
-
-**Post-Migration Verification**:
-- [ ] Record count matches expected range
-- [ ] No duplicate entries detected
-- [ ] Date ranges are continuous
-- [ ] Price ranges are within normal thresholds
-- [ ] All required products are present
-- [ ] Migration log is complete
-
-#### 3.3 Rollback Procedure
-
-If migration fails or data quality issues are detected:
-
-```sql
--- Restore from backup
-TRUNCATE TABLE precios_sipsa;
-INSERT INTO precios_sipsa 
-SELECT * FROM precios_sipsa_backup_YYYYMMDD;
-
--- Log rollback
-INSERT INTO log_migraciones (estado, errores) 
-VALUES ('rollback', 'Reason for rollback...');
-```
 
 ## 📊 Data Traceability and Audit Trail
 
@@ -259,8 +242,6 @@ While we currently rely on DANE's published datasets, we acknowledge this limita
 > **Prepared for Evolution**: Our system architecture is designed to seamlessly integrate with future APIs when they become available. We continuously monitor:
 > - DANE's technological roadmap
 > - Government open data initiatives
-> - Alternative reliable data sources (agricultural cooperatives, market associations)
-> - International best practices in statistical data sharing
 
 **Potential Alternative Sources Under Evaluation**:
 - Ministry of Agriculture and Rural Development (MADR)
@@ -284,7 +265,6 @@ While we currently rely on DANE's published datasets, we acknowledge this limita
 |---------|------|--------|---------|
 | 1.0 | 2025-10-24 | Data Engineering Team | Initial documentation |
 
-**Last Reviewed**: October 24, 2025  
-**Next Review Date**: January 24, 2026  
+**Last Reviewed**: October 24, 2025    
 **Document Owner**: Data Engineering Team  
 **Approval Status**: Approved for Implementation 
