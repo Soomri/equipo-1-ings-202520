@@ -175,61 +175,106 @@ const RegisterPage = () => {
           </div>
 
           {/* Full name input field */}
-          <input
-            type="text"
-            placeholder="Nombre completo"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleRegister()}
-            style={{
-              width: '470px',
-              height: '65px',
-              backgroundColor: 'rgba(217, 217, 217, 0.5)',
-              border: '1px solid #000000',
-              borderRadius: '4px',
-              padding: '0 15px',
-              fontSize: '18px',
-              marginBottom: '35px'
-            }}
-          />
+          <div style={{ width: '470px', marginBottom: '35px' }}>
+            <label 
+              htmlFor="fullname-input"
+              style={{
+                display: 'block',
+                fontSize: '16px',
+                fontWeight: '500',
+                marginBottom: '8px',
+                color: '#333'
+              }}
+            >
+              Nombre completo
+            </label>
+            <input
+              id="fullname-input"
+              type="text"
+              placeholder="Nombre completo"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleRegister()}
+              style={{
+                width: '100%',
+                height: '65px',
+                backgroundColor: 'rgba(217, 217, 217, 0.5)',
+                border: '1px solid #000000',
+                borderRadius: '4px',
+                padding: '0 15px',
+                fontSize: '18px',
+                color: '#1a1a1a'
+              }}
+            />
+          </div>
 
           {/* Email input field */}
-          <input
-            type="email"
-            placeholder="Correo electrónico"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleRegister()}
-            style={{
-              width: '470px',
-              height: '65px',
-              backgroundColor: 'rgba(217, 217, 217, 0.5)',
-              border: '1px solid #000000',
-              borderRadius: '4px',
-              padding: '0 15px',
-              fontSize: '18px',
-              marginBottom: '35px'
-            }}
-          />
+          <div style={{ width: '470px', marginBottom: '35px' }}>
+            <label 
+              htmlFor="register-email-input"
+              style={{
+                display: 'block',
+                fontSize: '16px',
+                fontWeight: '500',
+                marginBottom: '8px',
+                color: '#333'
+              }}
+            >
+              Correo electrónico
+            </label>
+            <input
+              id="register-email-input"
+              type="email"
+              placeholder="Correo electrónico"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleRegister()}
+              style={{
+                width: '100%',
+                height: '65px',
+                backgroundColor: 'rgba(217, 217, 217, 0.5)',
+                border: '1px solid #000000',
+                borderRadius: '4px',
+                padding: '0 15px',
+                fontSize: '18px',
+                color: '#1a1a1a'
+              }}
+            />
+          </div>
 
           {/* Password input field */}
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleRegister()}
-            style={{
-              width: '470px',
-              height: '65px',
-              backgroundColor: 'rgba(217, 217, 217, 0.5)',
-              border: '1px solid #000000',
-              borderRadius: '4px',
-              padding: '0 15px',
-              fontSize: '18px',
-              marginBottom: '15px'
-            }}
-          />
+          <div style={{ width: '470px', marginBottom: '15px' }}>
+            <label 
+              htmlFor="register-password-input"
+              style={{
+                display: 'block',
+                fontSize: '16px',
+                fontWeight: '500',
+                marginBottom: '8px',
+                color: '#333'
+              }}
+            >
+              Contraseña
+            </label>
+            <input
+              id="register-password-input"
+              type="password"
+              placeholder="Contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleRegister()}
+              style={{
+                width: '100%',
+                height: '65px',
+                backgroundColor: 'rgba(217, 217, 217, 0.5)',
+                border: '1px solid #000000',
+                borderRadius: '4px',
+                padding: '0 15px',
+                fontSize: '18px',
+                color: '#1a1a1a'
+              }}
+            />
+          </div>
 
           {/* Password requirements */}
           <div style={{
@@ -243,23 +288,38 @@ const RegisterPage = () => {
           </div>
 
           {/* Confirm password input field */}
-          <input
-            type="password"
-            placeholder="Repetir contraseña"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleRegister()}
-            style={{
-              width: '470px',
-              height: '65px',
-              backgroundColor: 'rgba(217, 217, 217, 0.5)',
-              border: '1px solid #000000',
-              borderRadius: '4px',
-              padding: '0 15px',
-              fontSize: '18px',
-              marginBottom: '20px'
-            }}
-          />
+          <div style={{ width: '470px', marginBottom: '20px' }}>
+            <label 
+              htmlFor="confirm-password-input"
+              style={{
+                display: 'block',
+                fontSize: '16px',
+                fontWeight: '500',
+                marginBottom: '8px',
+                color: '#333'
+              }}
+            >
+              Repetir contraseña
+            </label>
+            <input
+              id="confirm-password-input"
+              type="password"
+              placeholder="Repetir contraseña"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleRegister()}
+              style={{
+                width: '100%',
+                height: '65px',
+                backgroundColor: 'rgba(217, 217, 217, 0.5)',
+                border: '1px solid #000000',
+                borderRadius: '4px',
+                padding: '0 15px',
+                fontSize: '18px',
+                color: '#1a1a1a'
+              }}
+            />
+          </div>
 
           {/* Error message */}
           {errorMessage && (

@@ -6,18 +6,19 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-gray-50" style={{ paddingBottom: '100px' }}>
         <div className="container flex justify-center">
           {/* Main Hero Card */}
           <div className="mb-8" style={{ 
             width: '1400px', 
-            height: '800px', 
+            height: '950px', 
             backgroundColor: 'rgba(248, 231, 176, 0.54)',
             borderRadius: '20px',
             padding: '50px',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center'
+            alignItems: 'center',
+            marginBottom: '40px'
           }}>
             {/* Title */}
             <h1 className="text-6xl font-bold mb-8" style={{ 
@@ -71,6 +72,30 @@ const HomePage = () => {
                   Busca tu producto y obtén información para tomar las mejores decisiones de compra.
                 </p>
               </div>
+            </div>
+
+            {/* Call to Action before Search */}
+            <div style={{
+              textAlign: 'center',
+              marginBottom: '30px',
+              marginTop: '20px'
+            }}>
+              <h3 style={{
+                fontSize: '28px',
+                fontWeight: '600',
+                color: '#2E7D32',
+                marginBottom: '12px',
+                textShadow: '1px 1px 2px rgba(0, 0, 0, 0.1)'
+              }}>
+                ¿Qué producto estás buscando hoy?
+              </h3>
+              <p style={{
+                fontSize: '18px',
+                color: '#555',
+                fontWeight: '400'
+              }}>
+                Ingresa el nombre del producto para consultar precios en tiempo real
+              </p>
             </div>
 
             {/* Search Component */}

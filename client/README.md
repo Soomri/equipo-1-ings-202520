@@ -100,7 +100,7 @@ npm run dev
 - [x] **Password recovery flow** with email integration
 - [x] **Password reset page** with token validation
 - [x] **Account lockout protection** (3 failed attempts)
-- [x] Product search component with plaza filtering
+- [x] **Product search component with plaza filtering**
 - [x] **Price history visualization** (F-02) with interactive charts
 - [x] **Product detail page** with comprehensive analysis
 - [x] **Statistical analysis** (trends, variations, key metrics)
@@ -114,17 +114,20 @@ npm run dev
 - [x] User logout flow (returns to landing page)
 - [x] Form validation (client and server-side)
 - [x] Loading states for async operations
+- [x] **UX Enhancements** (October 2024):
+  - [x] Visible labels on all form inputs
+  - [x] Improved text contrast across all inputs
+  - [x] Call-to-action heading on HomePage search
+  - [x] Redesigned filter system with visual indicators
+  - [x] Active filter badges and chips
+  - [x] Functional header search bar
+  - [x] Smart footer with section navigation
+  - [x] Footer removed from HomePage and ProductDetailPage
 
 ### 🔄 In Progress
 - [ ] Price predictions (F-03)
 - [ ] Plaza management (admin features)
 - [ ] User profile management
-
-### 📝 Pending
-- [ ] Predictions (F-03)
-- [ ] Comparison between plazas (F-04)
-- [ ] Custom baskets (F-07)
-- [ ] Admin panel for plaza management
 
 ---
 
@@ -134,11 +137,11 @@ npm run dev
 client/
 ├── src/
 │   ├── components/              # Reusable components
-│   │   ├── Header.jsx           # Application header
+│   │   ├── Header.jsx           # Application header with functional search
 │   │   ├── LandingHeader.jsx    # Landing page header
-│   │   ├── Footer.jsx           # Footer
+│   │   ├── Footer.jsx           # Smart footer with section navigation
 │   │   ├── PageTransition.jsx   # Page transition wrapper
-│   │   ├── ProductSearch.jsx    # Search form with plaza filtering
+│   │   ├── ProductSearch.jsx    # Advanced search with visual filter indicators
 │   │   ├── PriceResults.jsx     # Price results
 │   │   ├── PriceHistoryChart.jsx # Interactive price history chart (recharts)
 │   │   ├── PriceStats.jsx       # Price statistics cards
@@ -146,14 +149,14 @@ client/
 │   │   ├── QuickStats.jsx       # Quick statistics
 │   │   └── UserMenu.jsx         # User menu with logout
 │   ├── pages/                   # Main pages
-│   │   ├── LandingPage.jsx      # Landing page (root)
-│   │   ├── HomePage.jsx         # Main application page
+│   │   ├── LandingPage.jsx      # Landing page with section IDs for navigation
+│   │   ├── HomePage.jsx         # Main page with CTA and enhanced search
 │   │   ├── ProductDetailPage.jsx # Product detail with price history (F-02)
-│   │   ├── LoginPage.jsx        # Login page
-│   │   ├── RegisterPage.jsx     # Registration page
+│   │   ├── LoginPage.jsx        # Login page with visible labels
+│   │   ├── RegisterPage.jsx     # Registration page with visible labels
 │   │   ├── RegisterConfirmationPage.jsx  # Registration success
-│   │   ├── PasswordRecoveryPage.jsx      # Password recovery
-│   │   └── ResetPasswordPage.jsx         # Password reset with token
+│   │   ├── PasswordRecoveryPage.jsx      # Password recovery with labels
+│   │   └── ResetPasswordPage.jsx         # Password reset with labels
 │   ├── styles/                  # Style files
 │   │   ├── transitions.css      # Page transition animations
 │   │   └── product-detail.css   # Product detail page styles
@@ -477,41 +480,6 @@ npm run dev -- --port 3001
 Make sure the backend server has CORS configured to allow requests from `http://localhost:3000`.
 
 ---
-
-## 🧪 Testing the Application
-
-### Test Registration Flow
-1. Go to `http://localhost:3000/register`
-2. Fill form with valid data:
-   - Name: Any name
-   - Email: Valid email format
-   - Password: Min 8 chars, 1 uppercase, 1 number, 1 special char
-3. Submit and verify redirect to confirmation page
-
-### Test Login Flow
-1. Go to `http://localhost:3000/login`
-2. Enter registered credentials
-3. Verify redirect to `/home` with user menu
-
-### Test Password Recovery
-1. Go to `http://localhost:3000/password-recovery`
-2. Enter registered email
-3. Check email inbox for recovery link
-4. Click link to land on reset page
-5. Enter new password and confirm
-6. Verify success message and ability to login
-
-### Test Account Lockout
-1. Go to `http://localhost:3000/login`
-2. Enter wrong password 3 times
-3. Verify account lockout message
-4. Check email for recovery link
-5. Use link to reset password
-
-### Database 
-- Nothing directly on the client
-- All you need is Backend running on port 8000
-- .env file with VITE_API_URL
 
 ## 📞 Support
 

@@ -134,24 +134,39 @@ const ResetPasswordPage = () => {
 
             <form onSubmit={handleSubmit} style={{ width: '100%' }}>
               {/* New password input */}
-              <input
-                type="password"
-                placeholder="Nueva contraseña"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-                style={{
-                  width: '100%',
-                  height: '65px',
-                  backgroundColor: 'rgba(217, 217, 217, 0.5)',
-                  border: '1px solid #000000',
-                  borderRadius: '4px',
-                  padding: '0 15px',
-                  fontSize: '18px',
-                  marginBottom: '10px',
-                  opacity: isLoading ? 0.6 : 1
-                }}
-              />
+              <div style={{ marginBottom: '10px' }}>
+                <label 
+                  htmlFor="new-password-input"
+                  style={{
+                    display: 'block',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    marginBottom: '8px',
+                    color: '#333'
+                  }}
+                >
+                  Nueva contraseña
+                </label>
+                <input
+                  id="new-password-input"
+                  type="password"
+                  placeholder="Nueva contraseña"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  style={{
+                    width: '100%',
+                    height: '65px',
+                    backgroundColor: 'rgba(217, 217, 217, 0.5)',
+                    border: '1px solid #000000',
+                    borderRadius: '4px',
+                    padding: '0 15px',
+                    fontSize: '18px',
+                    color: '#1a1a1a',
+                    opacity: isLoading ? 0.6 : 1
+                  }}
+                />
+              </div>
               {/* Password requirements */}
               <p style={{
                 fontSize: '14px',
@@ -163,24 +178,39 @@ const ResetPasswordPage = () => {
               </p>
 
               {/* Confirm password input */}
-              <input
-                type="password"
-                placeholder="Confirmar contraseña"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={isLoading}
-                style={{
-                  width: '100%',
-                  height: '65px',
-                  backgroundColor: 'rgba(217, 217, 217, 0.5)',
-                  border: '1px solid #000000',
-                  borderRadius: '4px',
-                  padding: '0 15px',
-                  fontSize: '18px',
-                  marginBottom: '20px',
-                  opacity: isLoading ? 0.6 : 1
-                }}
-              />
+              <div style={{ marginBottom: '20px' }}>
+                <label 
+                  htmlFor="reset-confirm-password-input"
+                  style={{
+                    display: 'block',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    marginBottom: '8px',
+                    color: '#333'
+                  }}
+                >
+                  Confirmar contraseña
+                </label>
+                <input
+                  id="reset-confirm-password-input"
+                  type="password"
+                  placeholder="Confirmar contraseña"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isLoading}
+                  style={{
+                    width: '100%',
+                    height: '65px',
+                    backgroundColor: 'rgba(217, 217, 217, 0.5)',
+                    border: '1px solid #000000',
+                    borderRadius: '4px',
+                    padding: '0 15px',
+                    fontSize: '18px',
+                    color: '#1a1a1a',
+                    opacity: isLoading ? 0.6 : 1
+                  }}
+                />
+              </div>
 
               {/* Error message */}
               {error && (
