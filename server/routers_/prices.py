@@ -140,3 +140,34 @@ def list_medellin_markets(db: Session = Depends(get_db)):
         "plazas": [{"id": row.plaza_id, "nombre": row.nombre, "ciudad": row.ciudad} for row in result],
         "mensaje": "Lista de plazas de Medellín obtenida exitosamente."
     }
+
+# --- Endpoint 5: Quick search for products ---
+@router.get("/search/")
+def quick_search_products(query: str, db: Session = Depends(get_db)):
+    """
+    Quick product search by partial name.
+
+    """
+    search_query = text("""
+        SELECT producto_id, nombre
+        FROM productos
+        WHERE nombre ILIKE :search_term
+        ORDER BY nombre ASC
+        LIMIT 10
+    """)
+    
+    results = db.execute(search_query, {"search_term": f"%{query}%"}).fetchall()
+
+    if not results:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No se encontraron productos relacionados con '{query}', revisa la escritura."
+        )
+
+    return {
+        "resultados": [
+            {"id": row.producto_id, "nombre": row.nombre}
+            for row in results
+        ],
+        "mensaje": "Búsqueda rápida realizada exitosamente."
+    }
