@@ -146,8 +146,9 @@ def list_medellin_markets(db: Session = Depends(get_db)):
 def quick_search_products(query: str, db: Session = Depends(get_db)):
     """
     Quick product search by partial name.
-
+    If no matches are found, suggests similar product names.
     """
+    # --- Main query: try to find partial matches ---
     search_query = text("""
         SELECT producto_id, nombre
         FROM productos
@@ -158,12 +159,36 @@ def quick_search_products(query: str, db: Session = Depends(get_db)):
     
     results = db.execute(search_query, {"search_term": f"%{query}%"}).fetchall()
 
+    # --- If no results found, try to suggest similar names ---
     if not results:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No se encontraron productos relacionados con '{query}', revisa la escritura."
-        )
+        suggestion_query = text("""
+            SELECT producto_id, nombre
+            FROM productos
+            WHERE nombre ILIKE :similar
+            ORDER BY nombre ASC
+            LIMIT 5
+        """)
+        # Use the first 3 characters of the query (if available) for suggestions
+        prefix = query[:3] if len(query) >= 3 else query
+        suggestions = db.execute(suggestion_query, {"similar": f"%{prefix}%"}).fetchall()
 
+        # --- If suggestions exist, return them to the user ---
+        if suggestions:
+            return {
+                "sugerencias": [
+                    {"id": s.producto_id, "nombre": s.nombre}
+                    for s in suggestions
+                ],
+                "mensaje": f"No se encontraron coincidencias exactas para '{query}', pero quizá quiso decir uno de estos."
+            }
+        # --- If no suggestions either, raise 404 ---
+        else:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No se encontraron productos relacionados con '{query}', revisa la escritura."
+            )
+
+    # --- If results were found, return them normally ---
     return {
         "resultados": [
             {"id": row.producto_id, "nombre": row.nombre}
