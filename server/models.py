@@ -143,7 +143,12 @@ class PlazaMercado(Base):
 
     plaza_id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, nullable=False)
+    direccion = Column(String, nullable=True)
     ciudad = Column(String, nullable=False)
+    coordenadas = Column(String, nullable=True)
+    estado = Column(String, default="activa") 
+    fecha_creacion = Column(DateTime, default=datetime.utcnow)
+    fecha_actualizacion = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     precios = relationship("Price", back_populates="plaza")
 
