@@ -152,5 +152,5 @@ def predict_prices(product_name, months_ahead=6):
 
 # Example run
 if __name__ == "__main__":
-    result = predict_prices("Gelatina", months_ahead=6)
+    result = predict_prices("Harina De Trigo", months_ahead=6)
     print(result)
