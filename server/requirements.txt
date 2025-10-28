@@ -25,6 +25,6 @@ python-dateutil                # Date parsing and manipulation utilities
 # --- Data Science & Prediction ---
 pandas                         # Data manipulation
 numpy                          # Numerical computations
-prophet                        # Forecasting for time series
+prophet==1.2.1                # Forecasting for time series
 scikit-learn                   # Metrics and evaluation (MAE, RMSE, etc.)
 holidays                       # Colombian holidays for Prophet
