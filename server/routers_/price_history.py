@@ -104,7 +104,7 @@ def get_price_history(
         12,
         ge=1,
         le=120,
-        description="Number of months to query (min: 1, max: 120, default: 12)"
+        description="Número de meses a consultar (mín: 1, máx: 120, por defecto: 12)"
     )
 ) -> Dict:
     """
@@ -117,24 +117,26 @@ def get_price_history(
         if months < 1 or months > 120:
             raise HTTPException(
                 status_code=400,
-                detail=f"Parameter 'months' must be between 1 and 120 (received: {months})"
+                detail=f"El parámetro 'months' debe estar entre 1 y 120 (recibido: {months})."
             )
 
         product_name_normalized = product_name.replace("-", " ").replace("_", " ").strip()
 
         #  Validate plaza status before proceeding
         check_query = text("""
-            SELECT plz.estado 
-            FROM productos AS prod
-            JOIN plazas AS plz ON prod.plaza_id = plz.plaza_id
-            WHERE LOWER(REPLACE(REPLACE(prod.nombre, ' ', ''), '-', '')) = 
-                  LOWER(REPLACE(REPLACE(:product_name, ' ', ''), '-', ''))
-            LIMIT 1
+                 SELECT plz.estado
+                FROM precios AS pr
+                JOIN productos AS prod ON prod.producto_id = pr.producto_id
+                JOIN plazas_mercado AS plz ON pr.plaza_id = plz.plaza_id
+                WHERE LOWER(REPLACE(REPLACE(prod.nombre, ' ', ''), '-', '')) =
+                    LOWER(REPLACE(REPLACE(:product_name, ' ', ''), '-', ''))
+                LIMIT 1
         """)
+
         plaza_status = db.execute(check_query, {"product_name": product_name_normalized}).fetchone()
 
         if plaza_status and plaza_status[0].lower() != "activa":
-            raise HTTPException(status_code=403, detail="The market associated with this product is inactive.")
+            raise HTTPException(status_code=403, detail="El mercado asociado a este producto está inactivo.")
 
         start_date = datetime.utcnow() - timedelta(days=30 * months)
 
@@ -145,7 +147,7 @@ def get_price_history(
                 hp.precio_historico AS precio_por_kg
             FROM historial_precios AS hp
             JOIN productos AS prod ON hp.producto_id = prod.producto_id
-            JOIN plazas AS plz ON prod.plaza_id = plz.plaza_id
+            JOIN plazas_mercado AS plz ON prod.plaza_id = plz.plaza_id
             WHERE LOWER(REPLACE(REPLACE(prod.nombre, ' ', ''), '-', '')) = 
                   LOWER(REPLACE(REPLACE(:product_name, ' ', ''), '-', ''))
               AND plz.estado = 'activa'
@@ -164,12 +166,12 @@ def get_price_history(
             if similar:
                 raise HTTPException(
                     status_code=404,
-                    detail=f"No price history found for '{product_name}'. Did you mean: {', '.join(similar)}?"
+                    detail=f"No se encontró historial de precios para '{product_name}'. ¿Quizás quiso decir: {', '.join(similar)}?"
                 )
             raise HTTPException(
                 status_code=404,
-                detail=f"No historical data found for '{product_name}' in the last {months} months "
-                       f"or the associated market is inactive."
+                detail=f"No se encontraron datos históricos para '{product_name}' en los últimos {months} meses "
+                       f"o el mercado asociado está inactivo."
             )
 
         # Build structured history

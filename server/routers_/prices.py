@@ -34,9 +34,9 @@ def get_latest_price(product_name: str, market_name: str, db: Session = Depends(
     plaza_status = db.execute(plaza_status_query, {"market_name": f"%{market_name}%"}).fetchone()
 
     if not plaza_status:
-        raise HTTPException(status_code=404, detail=f"No market found with name similar to '{market_name}'.")
+        raise HTTPException(status_code=404, detail=f"No se encontró ninguna plaza con un nombre similar a '{market_name}'.")
     if plaza_status[0].lower() != "activa":
-        raise HTTPException(status_code=403, detail=f"The market '{market_name}' is currently inactive.")
+        raise HTTPException(status_code=403, detail=f"La plaza '{market_name}' está actualmente inactiva.")
 
     # ✅ Step 2: Try to find the latest price
     query = text("""
@@ -73,16 +73,16 @@ def get_latest_price(product_name: str, market_name: str, db: Session = Depends(
             raise HTTPException(
                 status_code=404,
                 detail={
-                    "message": f"No results for '{product_name}' in '{market_name}'. "
-                               "Perhaps you meant one of these?",
+                    "message": f"No se encontraron resultados para '{product_name}' en '{market_name}'. "
+                               "¿Quizás quisiste decir uno de estos?",
                     "suggestions": suggested_names
                 }
             )
         else:
             raise HTTPException(
                 status_code=404,
-                detail=f"No results found for '{product_name}' in '{market_name}', "
-                       "or the market has no recent price data."
+                detail=f"No se encontraron resultados para '{product_name}' en '{market_name}', "
+                       "o la plaza no tiene datos de precios recientes."
             )
 
     return {
