@@ -1,3 +1,4 @@
+
 # 🏪 Plaza Market API – Admin Status Control
 
 This guide explains how to test the authentication system and update a market’s operational status (`activa` / `inactiva`) using **FastAPI Swagger UI**.
@@ -25,7 +26,6 @@ Then open your browser at:
    ```
    POST /auth/login
    ```
-
 2. Enter your credentials (JSON body):
 
    ```json
@@ -34,12 +34,10 @@ Then open your browser at:
      "contrasena": "your_admin_password"
    }
    ```
-
 3. Click **Execute**.
-
 4. Copy the value of `"access_token"` from the response:
 
-   ```
+   ```json
    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    ```
 
@@ -51,7 +49,7 @@ Then open your browser at:
 2. In the value field, paste the token like this:
 
    ```
-   Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    ```
 
    ⚠️ Make sure you only include **one** `Bearer`.
@@ -69,8 +67,8 @@ Then open your browser at:
    ```
 2. Set:
 
-   * **plaza_id (path)** → `1`
-   * **estado (query)** → `inactiva`
+   * **plaza_id (path)** → e.g `1`
+   * **estado (query)** → e.g `inactiva`
 3. Click **Execute**.
 
 ✅ **Expected success response:**
@@ -78,21 +76,20 @@ Then open your browser at:
 ```json
 {
   "plaza_id": 1,
-  "nombre": "Plaza Central",
+  "nombre": "Central Mayorista de Antioquia",
   "nuevo_estado": "inactiva",
-  "mensaje": "Plaza 'Plaza Central' updated to 'inactiva'."
+  "mensaje": "Plaza 'Central Mayorista de Antioquia' actualiazada a  'inactiva'."
 }
 ```
 
-This means the authenticated admin (`plazeserviceuser@gmail.com`) successfully changed the market status.
+This means the authenticated admin successfully changed the market status.
 
 ---
 
 ## 🚫 5. Test: Update a Market as a Non-Admin User (Forbidden ❌)
 
-1. First, log out from Swagger (**“Logout”** button near Authorize).
-
-2. Log in again, but with a **different user** (not the admin):
+1. Log out from Swagger (**“Logout”** button near Authorize).
+2. Log in again, but with a **different user** (not admin):
 
    ```json
    {
@@ -100,10 +97,8 @@ This means the authenticated admin (`plazeserviceuser@gmail.com`) successfully c
      "contrasena": "some_password"
    }
    ```
-
-3. Copy the new token and authorize it as before.
-
-4. Try executing again:
+3. Authorize the token again.
+4. Try executing:
 
    ```
    PUT /plazas/1/estado?estado=inactiva
@@ -117,45 +112,115 @@ This means the authenticated admin (`plazeserviceuser@gmail.com`) successfully c
 }
 ```
 
-This confirms that only the admin account is allowed to change the market status.
+---
+
+## 🧾 6. Test: Behavior When a Plaza Is Inactive
+
+After setting **“Central Mayorista de Antioquia”** to `inactiva`, test how the price endpoints respond.
 
 ---
 
-## ⚠️ 6. Common Issues
+### 🔍 A. Try fetching a product price (should fail)
 
-| Error Message                                     | Cause                                        | Solution                                     |
-| ------------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
-| `401 Unauthorized` – `"Invalid or expired token"` | Token expired or “Bearer Bearer” duplication | Log in again and check header format         |
-| `403 Forbidden` – `"Acceso denegado..."`          | Non-admin user attempting restricted action  | Use admin credentials                        |
-| `404 Not Found`                                   | The `plaza_id` doesn’t exist                 | Verify that the plaza exists in the database |
+Endpoint:
 
----
-
-## ✅ Example CURL Requests
-
-### ✔️ Admin User (Success)
-
-```bash
-curl -X 'PUT' \
-  'http://127.0.0.1:8000/plazas/1/estado?estado=inactiva' \
-  -H 'accept: application/json' \
-  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+```
+GET /prices/latest/
 ```
 
-### ❌ Non-Admin User (Forbidden)
+**Parameters:**
 
-```bash
-curl -X 'PUT' \
-  'http://127.0.0.1:8000/plazas/1/estado?estado=inactiva' \
-  -H 'accept: application/json' \
-  -H 'Authorization: Bearer eyJh...non_admin_token...'
+```
+product_name = "Aguacate Común"
+market_name = "Central Mayorista de Antioquia"
 ```
 
-**Response:**
+🚫 **Expected error response:**
 
 ```json
 {
-  "detail": "Acceso denegado. Solo el administrador puede realizar esta acción."
+  "detail": "El mercado 'Central Mayorista de Antioquia' está actualmente inactivo."
+}
+```
+
+✅ This confirms that inactive markets are correctly excluded from price queries.
+
+---
+
+### 📋 B. Check active markets
+
+Endpoint:
+
+```
+GET /prices/markets/medellin/
+```
+
+**Expected:**
+“Central Mayorista de Antioquia” should **not appear** in the list.
+
+Example response:
+
+```json
+{
+  "plazas": [
+    {
+      "id": 2,
+      "nombre": "Plaza Minorista",
+      "ciudad": "Medellín"
+    }
+  ],
+  "mensaje": "Lista de plazas activas de Medellín obtenida exitosamente."
+}
+```
+
+---
+
+### ⚙️ C. Check available options
+
+Endpoint:
+
+```
+GET /prices/options/
+```
+
+**Expected:**
+Only active markets appear under `"plazas"`.
+
+Example:
+
+```json
+{
+  "productos": [...],
+  "plazas": [
+    { "id": 2, "nombre": "Plaza Minorista", "ciudad": "Medellín" }
+  ],
+  "mensaje": "Opciones disponibles obtenidas correctamente (solo plazas activas)."
+}
+```
+
+---
+
+## 🔁 7. Reactivate the Market
+
+Once the tests are completed, reactivate the plaza by calling the same endpoint again:
+
+```
+PUT /plazas/{plaza_id}/estado
+```
+
+**Parameters:**
+
+* **plaza_id (path)** → `1`
+* **estado (query)** → `activa`
+
+✅ **Expected success response:**
+
+```json
+{
+  "plaza_id": 1,
+  "nombre": "Central Mayorista de Antioquia",
+  "nuevo_estado": "activa",
+  "mensaje": "Plaza 'Central Mayorista de Antioquia' updated to 'activa'."
 }
 ```
 
