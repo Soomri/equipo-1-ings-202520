@@ -39,5 +39,5 @@ def update_market_status(
         "plaza_id": plaza.plaza_id,
         "nombre": plaza.nombre,
         "nuevo_estado": plaza.estado,
-        "mensaje": f"Plaza '{plaza.nombre}' updated to '{plaza.estado}'."
+        "mensaje": f"Plaza '{plaza.nombre}' actualizada a '{plaza.estado}'."
     }
