@@ -52,8 +52,6 @@ Then open your browser at:
     eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    ```
 
-   ⚠️ Make sure you only include **one** `Bearer`.
-   (Swagger sometimes duplicates it as `Bearer Bearer` — remove the extra one.)
 3. Click **Authorize**, then **Close**.
 
 ---
@@ -78,7 +76,7 @@ Then open your browser at:
   "plaza_id": 1,
   "nombre": "Central Mayorista de Antioquia",
   "nuevo_estado": "inactiva",
-  "mensaje": "Plaza 'Central Mayorista de Antioquia' actualiazada a  'inactiva'."
+  "mensaje": "Plaza 'Central Mayorista de Antioquia' actualizada a  'inactiva'."
 }
 ```
 
