@@ -35,11 +35,11 @@ Then open your browser at:
    }
    ```
 3. Click **Execute**.
-4. Copy the value of `"access_token"` from the response:
+4. Copy the value of "access_token" from the response — not the example below, which is only for reference:
 
-   ```json
-   eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-   ```
+"access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+⚠️ Note: The token above is just an example and won’t work. Replace it with your actual token.
 
 ---
 
