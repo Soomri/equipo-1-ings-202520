@@ -26,3 +26,11 @@
 
 > ### Estado del tablero
 ![Tablero backlog viernes 10 octubre](images_sprint/Backlog_24oct.png)
+
+## 🎃 Viernes 31 octubre
+
+> ### Diagrama burndown
+![Diagrama burndown viernes 31 octubre](images_sprint/Burndown-31oct.png)
+
+> ### Estado del tablero
+![Tablero backlog viernes 31 octubre](images_sprint/Backlog-31oct.png)
