@@ -5,6 +5,7 @@ This module provides a RESTful endpoint for retrieving and analyzing
 the historical price variation of products over a specified period.
 It uses the `historial_precios` table to include multiple time points
 and provides trend analysis, statistical summaries, and period detection.
+Now it also filters out products whose market (plaza) is inactive.
 """
 
 from fastapi import APIRouter, HTTPException, Query
@@ -20,29 +21,12 @@ router = APIRouter(
 )
 
 
+# ----------------------------- #
+#   Helper Functions            #
+# ----------------------------- #
+
 def find_similar_products(db, product_name: str, limit: int = 5) -> List[str]:
-    """
-    Find products with similar names using partial matching.
-
-    This function performs a case-insensitive search for products whose
-    names contain the search term. It's useful for suggesting alternatives
-    when an exact match is not found.
-
-    Args:
-        db: SQLAlchemy database session for executing queries.
-        product_name (str): The product name to search for (supports partial matches).
-        limit (int, optional): Maximum number of similar products to return.
-            Defaults to 5.
-
-    Returns:
-        List[str]: List of product names that match the search pattern.
-            Returns empty list if no matches found or if an error occurs.
-
-    Example:
-        >>> similar = find_similar_products(db, "tomate", limit=3)
-        >>> print(similar)
-        ['Tomate', 'Tomate cherry', 'Tomate de árbol']
-    """
+    """Find products with similar names using partial matching."""
     try:
         query = text("""
             SELECT DISTINCT prod.nombre
@@ -60,41 +44,7 @@ def find_similar_products(db, product_name: str, limit: int = 5) -> List[str]:
 
 
 def analyze_periods(history: List[Dict]) -> List[Dict]:
-    """
-    Analyze product price history to detect trend periods.
-
-    This function identifies consecutive periods where prices follow a
-    consistent trend (increase, decrease, or stability) and calculates
-    the percentage variation for each period.
-
-    Args:
-        history (List[Dict]): List of historical price records, each containing:
-            - fecha (str): Date in ISO format
-            - precio_por_kg (float): Price per kilogram
-
-    Returns:
-        List[Dict]: List of detected trend periods, each containing:
-            - fecha_inicio (str): Period start date
-            - fecha_fin (str): Period end date
-            - precio_inicio (float): Initial price
-            - precio_fin (float): Final price
-            - tendencia (str): Trend type ("Aumento", "Disminución", "Estabilidad")
-            - variacion_porcentual (float): Percentage change during the period
-
-    Example:
-        >>> history = [
-        ...     {"fecha": "2024-01-01", "precio_por_kg": 100},
-        ...     {"fecha": "2024-02-01", "precio_por_kg": 110},
-        ...     {"fecha": "2024-03-01", "precio_por_kg": 105}
-        ... ]
-        >>> periods = analyze_periods(history)
-        >>> print(periods[0]["tendencia"])
-        'Aumento'
-
-    Note:
-        A variation greater than 2% is considered an increase, less than -2%
-        is a decrease, and between -2% and 2% is considered stability.
-    """
+    """Detect consecutive trend periods (increase, decrease, stability)."""
     if len(history) < 2:
         return []
 
@@ -143,6 +93,10 @@ def analyze_periods(history: List[Dict]) -> List[Dict]:
     return periods
 
 
+# ----------------------------- #
+#   Main Endpoint               #
+# ----------------------------- #
+
 @router.get("/{product_name}")
 def get_price_history(
     product_name: str,
@@ -150,53 +104,12 @@ def get_price_history(
         12,
         ge=1,
         le=120,
-        description="Number of months to query (min: 1, max: 120, default: 12)"
+        description="Número de meses a consultar (mín: 1, máx: 120, por defecto: 12)"
     )
 ) -> Dict:
     """
     Retrieve and analyze the historical price variation of a product.
-
-    This endpoint queries the historial_precios table to fetch complete
-    price history for a specified product over a given time period. It
-    provides statistical analysis, trend detection, and detailed historical data.
-
-    Args:
-        product_name (str): Name of the product to query. Supports hyphens
-            and underscores which are normalized to spaces.
-        months (int, optional): Number of months to look back in history.
-            Must be between 1 and 120. Defaults to 12 months.
-
-    Returns:
-        Dict: A comprehensive price history analysis containing:
-            - producto (str): Normalized product name
-            - periodo_meses (int): Number of months analyzed
-            - fecha_inicio (str): First date in the dataset
-            - fecha_fin (str): Last date in the dataset
-            - tendencia_general (str): Overall trend classification
-            - estadisticas (dict): Statistical summary including initial, final,
-              average, max, min prices and percentage change
-            - periodos (List[Dict]): Detected trend periods with details
-            - historial (List[Dict]): Complete chronological price records
-
-    Raises:
-        HTTPException: 400 if months parameter is invalid (not between 1 and 120).
-        HTTPException: 404 if no data found for the product.
-            If similar products exist, they are suggested in the error message.
-
-    Example:
-        >>> response = get_price_history("tomate", months=6)
-        >>> print(response["tendencia_general"])
-        'Aumento'
-        >>> print(response["estadisticas"]["precio_promedio"])
-        45.32
-
-    Note:
-        - Product names are normalized by removing spaces and hyphens
-          for flexible matching
-        - Prices are retrieved from the historial_precios table
-        - Trends are classified as "Aumento" (>5%), "Disminución" (<-5%),
-          or "Estabilidad" (between -5% and 5%)
-        - Valid months range: 1-120 (1 month to 10 years)
+    Only returns data if the associated market (plaza) is active.
     """
     db = SessionLocal()
     try:
@@ -204,22 +117,40 @@ def get_price_history(
         if months < 1 or months > 120:
             raise HTTPException(
                 status_code=400,
-                detail="El parámetro 'months' debe estar entre 1 y 120. "
-                       f"Valor recibido: {months}"
+                detail=f"El parámetro 'months' debe estar entre 1 y 120 (recibido: {months})."
             )
 
         product_name_normalized = product_name.replace("-", " ").replace("_", " ").strip()
+
+        #  Validate plaza status before proceeding
+        check_query = text("""
+                 SELECT plz.estado
+                FROM precios AS pr
+                JOIN productos AS prod ON prod.producto_id = pr.producto_id
+                JOIN plazas_mercado AS plz ON pr.plaza_id = plz.plaza_id
+                WHERE LOWER(REPLACE(REPLACE(prod.nombre, ' ', ''), '-', '')) =
+                    LOWER(REPLACE(REPLACE(:product_name, ' ', ''), '-', ''))
+                LIMIT 1
+        """)
+
+        plaza_status = db.execute(check_query, {"product_name": product_name_normalized}).fetchone()
+
+        if plaza_status and plaza_status[0].lower() != "activa":
+            raise HTTPException(status_code=403, detail="El mercado asociado a este producto está inactivo.")
+
         start_date = datetime.utcnow() - timedelta(days=30 * months)
 
-        # ✅ Query now uses historial_precios instead of precios
+        #  Main query (includes filter for active plazas)
         query = text("""
             SELECT 
                 hp.fecha_precio AS fecha,
                 hp.precio_historico AS precio_por_kg
             FROM historial_precios AS hp
             JOIN productos AS prod ON hp.producto_id = prod.producto_id
+            JOIN plazas_mercado AS plz ON prod.plaza_id = plz.plaza_id
             WHERE LOWER(REPLACE(REPLACE(prod.nombre, ' ', ''), '-', '')) = 
                   LOWER(REPLACE(REPLACE(:product_name, ' ', ''), '-', ''))
+              AND plz.estado = 'activa'
               AND hp.fecha_precio >= :start_date
             ORDER BY hp.fecha_precio ASC
         """)
@@ -235,13 +166,12 @@ def get_price_history(
             if similar:
                 raise HTTPException(
                     status_code=404,
-                    detail=f"No se encontraron datos para '{product_name}'. "
-                           f"¿Quisiste decir: {', '.join(similar)}?"
+                    detail=f"No se encontró historial de precios para '{product_name}'. ¿Quizás quiso decir: {', '.join(similar)}?"
                 )
             raise HTTPException(
                 status_code=404,
-                detail=f"No se encontraron datos históricos para '{product_name}' "
-                       f"en los últimos {months} meses."
+                detail=f"No se encontraron datos históricos para '{product_name}' en los últimos {months} meses "
+                       f"o el mercado asociado está inactivo."
             )
 
         # Build structured history

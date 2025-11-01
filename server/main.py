@@ -6,7 +6,8 @@ creates database tables, and registers all API routers for different
 functional domains (authentication, prices, health checks, etc.).
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException,Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware  # CORS middleware for cross-origin requests
 from routers_.user_registration import router as user_registration_router
 from routers_ import auth, password_recovery
@@ -16,6 +17,7 @@ from dotenv import load_dotenv
 from routers_.health_routes import router as health_router
 from routers_.maintenance_routes import router as maintenance_router
 from routers_.price_history import router as price_history_router
+from routers_.markets import router as markets_router
 
 # Load environment variables
 load_dotenv()
@@ -44,6 +46,29 @@ app.add_middleware(
     allow_headers=["*"],              # Allow all headers (including Authorization)
 )
 
+#  Global error handler  
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    # Handle forbidden access (403)
+    if exc.status_code == 403:
+        return JSONResponse(
+            status_code=403,
+            content={"detail": "Acceso prohibido: no tienes permisos o no estás autenticado."}
+        )
+    # Handle unauthorized access (401)
+    elif exc.status_code == 401:
+        return JSONResponse(
+            status_code=401,
+            content={"detail": "No estás autenticado o tu token no es válido."}
+        )
+    # Default behavior for other HTTP exceptions
+    else:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+        )
+
+
 # Include routers
 app.include_router(user_registration_router)
 app.include_router(auth.router, tags=["Auth"])
@@ -52,6 +77,7 @@ app.include_router(prices_router, tags=["Prices"])
 app.include_router(health_router)
 app.include_router(maintenance_router)
 app.include_router(price_history_router)
+app.include_router(markets_router, tags=["Markets"]) 
 
 @app.get("/")
 def root():
