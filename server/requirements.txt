@@ -21,3 +21,10 @@ pydantic[email]                # Email validation in Pydantic models
 
 # --- Date & Time utilities ---
 python-dateutil                # Date parsing and manipulation utilities
+
+# --- Testing dependencies ---
+pytest                         # Main testing framework
+httpx                          # Required for FastAPI TestClient
+pytest-asyncio                 # Optional, for async endpoints 
+pytest-benchmark               # Optional, for performance tests 
+
