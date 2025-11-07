@@ -64,32 +64,82 @@ const LoginPage = () => {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#FFFFFF',
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'relative'
-    }}>
-      {/* Logo in top left corner */}
+    <>
+      <style>{`
+        @media (max-width: 768px) {
+          .login-container {
+            padding: 40px 30px 30px 30px !important;
+          }
+          .login-title {
+            font-size: 36px !important;
+            margin-bottom: 35px !important;
+          }
+          .login-input-wrapper {
+            width: 100% !important;
+            max-width: 350px !important;
+          }
+          .login-error-message {
+            width: 100% !important;
+            max-width: 350px !important;
+          }
+          .logo-container {
+            left: 20px !important;
+          }
+          .logo-image {
+            height: 150px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .login-container {
+            padding: 30px 20px 20px 20px !important;
+          }
+          .login-title {
+            font-size: 28px !important;
+            margin-bottom: 25px !important;
+          }
+          .login-button {
+            width: 160px !important;
+            height: 45px !important;
+            font-size: 20px !important;
+          }
+          .login-input-wrapper {
+            width: 95% !important;
+          }
+          .login-error-message {
+            width: 95% !important;
+          }
+          .logo-image {
+            height: 120px !important;
+          }
+        }
+      `}</style>
       <div style={{
-        position: 'absolute',
-        top: '10px',
-        left: '40px'
+        minHeight: '100vh',
+        backgroundColor: '#FFFFFF',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative'
       }}>
-        <Link to="/">
-          <img 
-            src="/client_images/Plaze-Logo.png" 
-            alt="Plaze Logo" 
-            style={{
-              height: '220px',
-              width: 'auto',
-              objectFit: 'contain',
-              cursor: 'pointer'
-            }}
-          />
-        </Link>
-      </div>
+        {/* Logo in top left corner */}
+        <div className="logo-container" style={{
+          position: 'absolute',
+          top: '10px',
+          left: '40px'
+        }}>
+          <Link to="/">
+            <img 
+              className="logo-image"
+              src="/client_images/Plaze-Logo.png" 
+              alt="Plaze Logo" 
+              style={{
+                height: '220px',
+                width: 'auto',
+                objectFit: 'contain',
+                cursor: 'pointer'
+              }}
+            />
+          </Link>
+        </div>
 
       {/* Centered login form */}
       <div style={{
@@ -99,9 +149,10 @@ const LoginPage = () => {
         alignItems: 'center',
         padding: '20px'
       }}>
-        <div style={{
-          width: '680px',
-          height: '750px',
+        <div className="login-container" style={{
+          width: '100%',
+          maxWidth: '680px',
+          minHeight: '750px',
           backgroundColor: '#F5F5F5',
           border: '1px solid rgba(0, 0, 0, 0.25)',
           boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
@@ -109,10 +160,10 @@ const LoginPage = () => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          padding: '60px 80px'
+          padding: '60px 80px 40px 80px'
         }}>
           {/* Page title */}
-          <h1 style={{
+          <h1 className="login-title" style={{
             fontSize: '48px',
             fontWeight: '600',
             marginBottom: '55px',
@@ -153,7 +204,7 @@ const LoginPage = () => {
           </div>
 
           {/* Email input field */}
-          <div style={{ width: '350px', marginBottom: '32px' }}>
+          <div className="login-input-wrapper" style={{ width: '350px', marginBottom: '32px' }}>
             <label 
               htmlFor="email-input"
               style={{
@@ -187,7 +238,7 @@ const LoginPage = () => {
           </div>
 
           {/* Password input field */}
-          <div style={{ width: '350px', marginBottom: '20px' }}>
+          <div className="login-input-wrapper" style={{ width: '350px', marginBottom: '20px' }}>
             <label 
               htmlFor="password-input"
               style={{
@@ -222,7 +273,7 @@ const LoginPage = () => {
 
           {/* Error message */}
           {errorMessage && (
-            <div style={{
+            <div className="login-error-message" style={{
               color: '#D32F2F',
               backgroundColor: '#FFEBEE',
               padding: '12px 20px',
@@ -239,6 +290,7 @@ const LoginPage = () => {
 
           {/* Login button */}
           <button
+            className="login-button"
             onClick={handleLogin}
             disabled={isLoading}
             style={{
@@ -259,9 +311,28 @@ const LoginPage = () => {
             {isLoading ? 'Iniciando...' : 'Iniciar Sesión'}
           </button>
 
-          {/* Forgot password link */}
+          {/* Register link */}
           <div style={{
             marginTop: '20px',
+            fontSize: '16px',
+            textAlign: 'center'
+          }}>
+            <span style={{ color: '#000000' }}>¿Aún no tienes una cuenta? </span>
+            <Link 
+              to="/register" 
+              style={{
+                color: '#4CA772',
+                textDecoration: 'underline',
+                cursor: 'pointer'
+              }}
+            >
+              Regístrate ahora
+            </Link>
+          </div>
+
+          {/* Forgot password link */}
+          <div style={{
+            marginTop: '15px',
             fontSize: '16px',
             textAlign: 'center'
           }}>
@@ -279,7 +350,8 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
 

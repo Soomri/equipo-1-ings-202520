@@ -8,6 +8,7 @@ import RegisterConfirmationPage from './pages/RegisterConfirmationPage'
 import PasswordRecoveryPage from './pages/PasswordRecoveryPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import ProductDetailPage from './pages/ProductDetailPage'
+import AdminPlazasPage from './pages/AdminPlazasPage'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import PageTransition from './components/PageTransition'
@@ -40,6 +41,7 @@ function AppContent() {
             <Route path="/password-recovery" element={<PasswordRecoveryPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/product/:productName" element={<ProductDetailPage />} />
+            <Route path="/admin/plazas" element={<AdminPlazasPage />} />
           </Routes>
         </PageTransition>
       </main>
