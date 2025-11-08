@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Store, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Store, List, Plus, Edit, Trash2 } from 'lucide-react'
 import { authService } from '../config/api'
 
 const AdminPlazasPage = () => {
@@ -31,6 +31,41 @@ const AdminPlazasPage = () => {
     navigate('/home')
   }
 
+  const adminOptions = [
+    {
+      id: 1,
+      title: 'Ver Listado de Plazas',
+      description: 'Consulta todas las plazas registradas en el sistema',
+      icon: List,
+      color: '#2196F3',
+      path: '/admin/plazas/list'
+    },
+    {
+      id: 2,
+      title: 'Crear Nueva Plaza',
+      description: 'Agrega una nueva plaza de mercado al sistema',
+      icon: Plus,
+      color: '#4CAF50',
+      path: '/admin/plazas/create'
+    },
+    {
+      id: 3,
+      title: 'Modificar Plaza',
+      description: 'Edita la información de una plaza existente',
+      icon: Edit,
+      color: '#FF9800',
+      path: '/admin/plazas/edit'
+    },
+    {
+      id: 4,
+      title: 'Eliminar Plaza',
+      description: 'Elimina una plaza del sistema',
+      icon: Trash2,
+      color: '#F44336',
+      path: '/admin/plazas/delete'
+    }
+  ]
+
   if (!currentUser.isAuthenticated || !isAdmin) {
     return null
   }
@@ -50,8 +85,8 @@ const AdminPlazasPage = () => {
           .admin-badge {
             align-self: flex-start !important;
           }
-          .admin-features-grid {
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+          .admin-options-grid {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
           }
         }
         @media (max-width: 768px) {
@@ -62,18 +97,12 @@ const AdminPlazasPage = () => {
           .admin-title {
             font-size: 1.75rem !important;
           }
-          .admin-card {
-            padding: 30px !important;
-          }
         }
         @media (max-width: 480px) {
           .admin-title {
             font-size: 1.5rem !important;
           }
-          .admin-card {
-            padding: 20px !important;
-          }
-          .admin-features-grid {
+          .admin-options-grid {
             grid-template-columns: 1fr !important;
           }
         }
@@ -82,126 +111,154 @@ const AdminPlazasPage = () => {
         <div className="container admin-container" style={{ paddingTop: '6rem', paddingBottom: '2rem' }}>
           {/* Header */}
           <div className="flex items-center justify-between mb-8 admin-header">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={handleBack}
-              className="btn btn-secondary"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '10px 20px',
-                backgroundColor: '#E8F5E9',
-                border: '1px solid #4CA772',
-                borderRadius: '8px',
-                color: '#2E7D32',
-                fontSize: '16px',
-                fontWeight: '500',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-            >
-              <ArrowLeft className="w-5 h-5" />
-              Volver al Inicio
-            </button>
-            <div>
-              <h1 className="text-4xl font-bold admin-title" style={{ color: '#4CA772' }}>
-                Administrar Plazas
-              </h1>
-              <p className="text-gray-600 mt-2">
-                Panel de administración de plazas de mercado
-              </p>
-            </div>
-          </div>
-          
-          {/* Admin Badge */}
-          <div className="admin-badge" style={{
-            backgroundColor: '#FF6B35',
-            color: '#FFFFFF',
-            fontSize: '12px',
-            fontWeight: '700',
-            padding: '8px 16px',
-            borderRadius: '20px',
-            letterSpacing: '0.5px',
-            boxShadow: '0 2px 8px rgba(255, 107, 53, 0.3)',
-            textTransform: 'uppercase',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <Store className="w-4 h-4" />
-            Modo Administrador
-          </div>
-        </div>
-
-        {/* Info Banner */}
-        <div style={{
-          backgroundColor: '#E3F2FD',
-          border: '1px solid #2196F3',
-          borderRadius: '12px',
-          padding: '20px',
-          marginBottom: '30px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px'
-        }}>
-          <AlertCircle className="w-6 h-6" style={{ color: '#1976D2', flexShrink: 0 }} />
-          <div>
-            <p style={{ color: '#1565C0', fontWeight: '600', marginBottom: '4px' }}>
-              Página de administración en construcción
-            </p>
-            <p style={{ color: '#1976D2', fontSize: '14px' }}>
-              Aquí podrás administrar las plazas de mercado del sistema. Esta funcionalidad estará disponible próximamente.
-            </p>
-          </div>
-        </div>
-
-        {/* Placeholder Content */}
-        <div className="card admin-card" style={{ 
-          padding: '40px', 
-          backgroundColor: '#FFFFFF',
-          borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-        }}>
-          <div style={{ textAlign: 'center', padding: '40px 0' }}>
-            <Store className="w-16 h-16 mx-auto mb-4" style={{ color: '#4CA772' }} />
-            <h2 className="text-2xl font-bold mb-4" style={{ color: '#333' }}>
-              Funcionalidades de Administración
-            </h2>
-            <p className="text-gray-600 mb-6" style={{ maxWidth: '600px', margin: '0 auto' }}>
-              Desde esta página podrás gestionar las plazas de mercado, agregar nuevas plazas,
-              editar información existente y más.
-            </p>
-            <div className="admin-features-grid" style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-              gap: '20px',
-              marginTop: '40px'
-            }}>
-              {/* Feature cards placeholders */}
-              {['Gestionar Plazas', 'Agregar Plaza', 'Ver Estadísticas', 'Configuración'].map((feature, index) => (
-                <div key={index} style={{
-                  padding: '24px',
-                  backgroundColor: '#F5F5F5',
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={handleBack}
+                className="btn btn-secondary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '10px 20px',
+                  backgroundColor: '#E8F5E9',
+                  border: '1px solid #4CA772',
                   borderRadius: '8px',
-                  border: '1px solid #E0E0E0'
-                }}>
-                  <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
-                    {feature}
-                  </h3>
-                  <p style={{ fontSize: '14px', color: '#666' }}>
-                    Funcionalidad disponible próximamente
-                  </p>
-                </div>
-              ))}
+                  color: '#2E7D32',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <ArrowLeft className="w-5 h-5" />
+                Volver al Inicio
+              </button>
+              <div>
+                <h1 className="text-4xl font-bold admin-title" style={{ color: '#4CA772' }}>
+                  Administrar Plazas
+                </h1>
+                <p className="text-gray-600 mt-2">
+                  Panel de administración de plazas de mercado
+                </p>
+              </div>
+            </div>
+            
+            {/* Admin Badge */}
+            <div className="admin-badge" style={{
+              backgroundColor: '#FF6B35',
+              color: '#FFFFFF',
+              fontSize: '12px',
+              fontWeight: '700',
+              padding: '8px 16px',
+              borderRadius: '20px',
+              letterSpacing: '0.5px',
+              boxShadow: '0 2px 8px rgba(255, 107, 53, 0.3)',
+              textTransform: 'uppercase',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <Store className="w-4 h-4" />
+              Modo Administrador
             </div>
           </div>
+
+          {/* Admin Options Grid */}
+          <div className="admin-options-grid" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '25px',
+            marginTop: '40px'
+          }}>
+            {adminOptions.map((option) => {
+              const Icon = option.icon
+              return (
+                <div 
+                  key={option.id}
+                  onClick={() => navigate(option.path)}
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '12px',
+                    padding: '30px',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s',
+                    border: '2px solid transparent'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-5px)'
+                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)'
+                    e.currentTarget.style.borderColor = option.color
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
+                    e.currentTarget.style.borderColor = 'transparent'
+                  }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '20px'
+                  }}>
+                    {/* Icon */}
+                    <div style={{
+                      backgroundColor: option.color,
+                      borderRadius: '12px',
+                      padding: '15px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <Icon className="w-8 h-8" style={{ color: '#FFFFFF' }} />
+                    </div>
+                    
+                    {/* Content */}
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{
+                        fontSize: '20px',
+                        fontWeight: '600',
+                        color: '#333',
+                        marginBottom: '10px'
+                      }}>
+                        {option.title}
+                      </h3>
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#666',
+                        lineHeight: '1.5'
+                      }}>
+                        {option.description}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Arrow indicator */}
+                  <div style={{
+                    marginTop: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    color: option.color,
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}>
+                    <span>Ir a {option.title.toLowerCase()}</span>
+                    <ArrowLeft style={{ 
+                      width: '16px', 
+                      height: '16px', 
+                      transform: 'rotate(180deg)' 
+                    }} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
-      </div>
       </div>
     </>
   )
 }
 
 export default AdminPlazasPage
-
