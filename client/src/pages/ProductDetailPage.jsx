@@ -150,27 +150,60 @@ const ProductDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container" style={{ paddingTop: '6rem', paddingBottom: '2rem' }}>
-        {/* Header with back button */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={handleBack}
-              className="btn btn-secondary"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
-            >
-              <ArrowLeft className="w-5 h-5" />
-              Volver
-            </button>
-            <div>
-              <h1 className="text-4xl font-bold" style={{ color: '#4CA772' }}>
-                {historyData.producto}
-              </h1>
+    <>
+      <style>{`
+        @media (max-width: 992px) {
+          .product-header {
+            flex-direction: column !important;
+            gap: 1rem !important;
+          }
+          .product-title {
+            font-size: 2rem !important;
+          }
+          .product-stats-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .product-title {
+            font-size: 1.75rem !important;
+          }
+          .product-content-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .product-title {
+            font-size: 1.5rem !important;
+          }
+          .product-container {
+            padding-top: 4rem !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+          }
+        }
+      `}</style>
+      <div className="min-h-screen bg-gray-50">
+        <div className="container product-container" style={{ paddingTop: '6rem', paddingBottom: '2rem' }}>
+          {/* Header with back button */}
+          <div className="flex items-center justify-between mb-8 product-header">
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={handleBack}
+                className="btn btn-secondary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                <ArrowLeft className="w-5 h-5" />
+                Volver
+              </button>
+              <div>
+                <h1 className="text-4xl font-bold product-title" style={{ color: '#4CA772' }}>
+                  {historyData.producto}
+                </h1>
               {selectedPlaza && (
                 <div 
                   style={{
@@ -282,7 +315,8 @@ const ProductDetailPage = () => {
           </p>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
 
