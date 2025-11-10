@@ -115,7 +115,6 @@ def predict_prices(product_name, months_ahead=6):
     mae = mean_absolute_error(y_true, y_pred)
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     mape = np.mean(np.abs((y_true - y_pred) / y_true)) * 100
-
     print(f" MAE={mae:.2f}, RMSE={rmse:.2f}, MAPE={mape:.2f}%")
 
     # Select future predictions
@@ -125,63 +124,59 @@ def predict_prices(product_name, months_ahead=6):
     preds.columns = ["Fecha", "Precio estimado (por Kg)", "Mínimo estimado", "Máximo estimado"]
     preds["Nivel de confianza (%)"] = 95.0
 
-    # Generate interactive plot
-    try:
-        fig = go.Figure()
-
-        # Historic data
-        fig.add_trace(go.Scatter(
-            x=product_df["ds"],
-            y=product_df["y"] * (y_max - y_min) + y_min,
-            mode='lines',
-            name='Histórico',
-            line=dict(color='blue')
-        ))
-
-        # Central prediction line
-        fig.add_trace(go.Scatter(
-            x=forecast["ds"],
-            y=forecast["yhat"],
-            mode='lines',
-            name='Predicción',
-            line=dict(color='orange')
-        ))
-
-        # Limits
-        fig.add_trace(go.Scatter(
-            x=forecast["ds"],
-            y=forecast["yhat_upper"],
-            mode='lines',
-            name='Límite superior',
-            line=dict(color='lightgrey')
-        ))
-        fig.add_trace(go.Scatter(
-            x=forecast["ds"],
-            y=forecast["yhat_lower"],
-            mode='lines',
-            name='Límite inferior',
-            line=dict(color='lightgrey', dash='dash')
-        ))
-
-        fig.update_layout(
-            title=f"Predicción de precios para {product_name}",
-            xaxis_title="Fecha",
-            yaxis_title="Precio por Kg",
-            template="plotly_white",
-            legend=dict(x=0, y=1.1, orientation="h")
-        )
-
-        # Save the plot
-        plot_path = os.path.join(BASE_DIR, "data", f"prediccion_{product_name.lower().replace(' ', '_')}.html")
-        fig.write_html(plot_path)
-        print(f" Gráfica interactiva guardada en: {plot_path}")
-
-    except Exception as e:
-        print(f" Error al generar o guardar la gráfica: {e}")
-
     # Visual formatting
     for col in ["Precio estimado (por Kg)", "Mínimo estimado", "Máximo estimado"]:
         preds[col] = preds[col].apply(lambda x: f"${x:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+
+    # Create interactive plot
+    plot_path = os.path.join(BASE_DIR, "data", f"prediccion_{product_name.lower().replace(' ', '_')}.html")
+    if not os.path.exists(plot_path):
+        try:
+            fig = go.Figure()
+
+            # Historic data
+            fig.add_trace(go.Scatter(
+                x=product_df["ds"], 
+                y=product_df["y"] * (y_max - y_min) + y_min,
+                mode='lines+markers', 
+                name='Histórico',
+                line=dict(color='blue')
+            ))
+
+            # Future predictions
+            fig.add_trace(go.Scatter(
+                x=forecast["ds"], 
+                y=forecast["yhat"], 
+                mode='lines',
+                name='Predicción',
+                line=dict(color='orange')
+            ))
+
+            # Confidence interval
+            fig.add_trace(go.Scatter(
+                x=pd.concat([forecast["ds"], forecast["ds"][::-1]]),
+                y=pd.concat([forecast["yhat_upper"], forecast["yhat_lower"][::-1]]),
+                fill='toself',
+                fillcolor='rgba(255, 165, 0, 0.2)',
+                line=dict(color='rgba(255,255,255,0)'),
+                hoverinfo="skip",
+                showlegend=True,
+                name='Intervalo de confianza'
+            ))
+
+            fig.update_layout(
+                title=f"Predicción de precios para {product_name}",
+                xaxis_title="Fecha",
+                yaxis_title="Precio por kilogramo (COP)",
+                template="plotly_white"
+            )
+
+            fig.write_html(plot_path)
+            print(f" Gráfica interactiva guardada en: {plot_path}")
+        except Exception as e:
+            print(f" Error al generar o guardar la gráfica: {e}")
+    else:
+        print(f" Gráfica ya existente en: {plot_path}, no se vuelve a generar.")
 
     # Save predictions to DB
     db = SessionLocal()
@@ -198,7 +193,7 @@ def predict_prices(product_name, months_ahead=6):
             for _, row in preds.iterrows():
                 fecha_pred = datetime.strptime(row['Fecha'], "%Y-%m-%d").date()
 
-                # Verifiy if prediction exists
+                # Verify if prediction already exists
                 existente = db.query(Predicciones).filter_by(
                     producto_id=product.producto_id,
                     plaza_id=plaza.plaza_id,
@@ -209,7 +204,7 @@ def predict_prices(product_name, months_ahead=6):
                     print(f"ℹ Predicción ya existente para {product_name}, {plaza.nombre}, fecha {fecha_pred}. Se omite.")
                     continue  # dont insert duplicates
 
-                # If it doesn't exist, create new prediction
+                # Create new prediction record
                 price = float(row['Precio estimado (por Kg)'].replace('$', '').replace('.', '').replace(',', '.'))
                 pred = Predicciones(
                     producto_id=product.producto_id,
@@ -223,12 +218,11 @@ def predict_prices(product_name, months_ahead=6):
                 db.add(pred)
 
         db.commit()
-        print(f" Predicciones guardadas correctamente.")
+        print(" Predicciones guardadas correctamente.")
     except Exception as e:
         db.rollback()
         print(f" Error interno al guardar predicciones: {type(e).__name__} - {e}")
         return {"error": "Ocurrió un problema al registrar las predicciones. Intenta nuevamente más tarde."}
-
     finally:
         db.close()
 
