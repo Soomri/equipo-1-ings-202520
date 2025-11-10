@@ -1,11 +1,11 @@
 # --- Core dependencies ---
-fastapi                       # Framework for building APIs
+fastapi==0.115.0              # Framework for building APIs
 uvicorn[standard]             # ASGI server for FastAPI with extras
 
 # --- Database & ORM ---
 sqlalchemy                     # ORM for database models and queries
-psycopg2-binary                # PostgreSQL driver (for Supabase or Postgres)
-supabase                        # Supabase client
+psycopg2-binary==2.9.9         # PostgreSQL driver (for Supabase or Postgres)
+supabase                       # Supabase client
 
 # --- Authentication & Security ---
 python-jose[cryptography]      # JWT creation and verification
@@ -17,7 +17,8 @@ python-dotenv                  # Load environment variables from .env
 
 # --- Email handling & validation ---
 email-validator                # Validate email formats
-pydantic[email]                # Email validation in Pydantic models
+pydantic[email]==2.8.2        # Pydantic with email support
+pydantic-core==2.20.1         # Core Pydantic functionalities
 
 # --- Date & Time utilities ---
 python-dateutil                # Date parsing and manipulation utilities

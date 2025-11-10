@@ -1,9 +1,19 @@
-# Ejecución del servicio de predicción
-El script puede ejecutarse directamente desde la carpeta server/services utilizando la opción -m de Python para respetar las rutas relativas:
+# 🧠 Price Prediction Service with Prophet
 
-* Instala las dependencias:
+This module implements a **price prediction service** using **Facebook Prophet**, with database persistence and interactive visualization through **Plotly**.  
+
+The service can be executed directly or accessed via the integrated **`/predictions/`** FastAPI endpoint.
+
+---
+
+## 🚀 Running the Prediction Service Manually
+
+The script can be executed directly from the `server/services` folder using Python’s `-m` option to ensure relative paths are respected.
+
+### 1 Install dependencies
+
 ```bash
-pip install -r requirements.txt
+pip install -r server/requirements.txt
 ```
 
 ```bash
@@ -11,7 +21,7 @@ cd server/services
 python -m prediction_service
 ```
 
-Esto ejecutará el ejemplo configurado al final del archivo:
+This will execute the example configured at the end of the file:
 
 ```python
 if __name__ == "__main__":
@@ -19,34 +29,45 @@ if __name__ == "__main__":
     print(result)
 ```
 
-## Resultado esperado
-1. Se verifica la existencia del archivo CSV.
-2. Se carga y limpia la información del producto solicitado.
-3. Se entrena o carga un modelo Prophet desde saved_models/. Si se recupera un modelo, se realiza lo mismo con su gráfico de predicción
-4. Se generan predicciones a 6 meses.
-5. Las predicciones se guardan en la base de datos (Predicciones).
-6. Se genera una gráfica interactiva HTML en:
+##🧩 Expected Output
+* The existence of the CSV file is verified.
+* The product’s price data is loaded and cleaned.
+* A Prophet model is trained or loaded from saved_models/.
+* If a saved model exists, its graph is also reused.
+* Price predictions for the next 6 months are generated.
+* Predictions are saved into the database (Predicciones).
+* An interactive HTML plot is created at:
 
 ```bash
 server/data/prediccion_<nombre_producto>.html
 ```
 
-7. En la terminal se imprimen las métricas de rendimiento del modelo:
+Model performance metrics are printed in the terminal:
 
 ```makefile
 MAE=145.32, RMSE=182.47, MAPE=12.3%
 Predicciones guardadas correctamente.
 ```
 
-### Notas
-* Se usa ruta relativa segura basada en __file__, por lo que no hay que modificar rutas locales.
+## 🌐 Using the /predictions/ Endpoint (FastAPI)
 
-* Los modelos Prophet se guardan en:
+The prediction service can also be executed through the API endpoint:
 
 ```bash
-server/services/saved_models/<producto>_prophet.pkl
+GET /predictions/
 ```
 
-* Las gráficas interactivas se generan con Plotly y se guardan en formato .html.
+Example Request
+```bash
+http://127.0.0.1:8000/predictions/?product_name=Aguacate%20Común&months_ahead=6
+```
+### Notes
+* A secure relative path based on __file__ is used, so there is no need to modify local paths.
+* Prophet models are saved in:
 
-* Si el registro de una predicción ya existe, el sistema la omite para evitar duplicados.
+```bash
+server/services/saved_models/<product>_prophet.pkl
+```
+
+* Interactive graphs are generated with Plotly and saved in .html format.
+* If a prediction record already exists, the system skips it to avoid duplicates.
