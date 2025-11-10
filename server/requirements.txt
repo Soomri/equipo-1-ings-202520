@@ -28,3 +28,4 @@ numpy                          # Numerical computations
 prophet==1.2.1                # Forecasting for time series
 scikit-learn                   # Metrics and evaluation (MAE, RMSE, etc.)
 holidays                       # Colombian holidays for Prophet
+joblib                         # Model serialization

@@ -175,8 +175,7 @@ class Predicciones(Base):
     ORM model for price predictions of products in markets.
 
     This model stores machine learning–based predictions for future product prices,
-    associated with specific markets (plazas). It records model parameters and
-    confidence levels to allow performance tracking and retraining.
+    associated with specific markets (plazas).
 
     Attributes:
         prediccion_id (int): Primary key, unique prediction identifier.
@@ -185,7 +184,6 @@ class Predicciones(Base):
         precio_predicho (Decimal): Predicted price per kilogram (> 0).
         fecha_prediccion (Date): Date for which the price is predicted.
         nivel_confianza (Decimal): Confidence level between 0 and 100 (%).
-        parametros_modelo (Text): JSON containing the model parameters used.
         fecha_creacion (Timestamp): Record creation timestamp.
         fecha_actualizacion (Timestamp): Record update timestamp.
 
@@ -202,7 +200,6 @@ class Predicciones(Base):
     precio_predicho = Column(DECIMAL(10, 2), nullable=False)
     fecha_prediccion = Column(Date, nullable=False)
     nivel_confianza = Column(DECIMAL(5, 2), nullable=False)
-    parametros_modelo = Column(String, nullable=True)
 
     fecha_creacion = Column(DateTime, default=datetime.utcnow)
     fecha_actualizacion = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
