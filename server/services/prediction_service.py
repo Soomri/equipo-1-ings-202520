@@ -5,6 +5,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 import holidays
 import os, sys, joblib
 from datetime import datetime
+import plotly.graph_objects as go
 
 # Database imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -12,12 +13,16 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Producto, PlazaMercado, Predicciones
 
+# Relative paths
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")) 
+DATA_PATH = os.path.join(BASE_DIR, "data", "precios_productos_limpio.csv")
+
 # Folder to save/load models
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "saved_models")
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 def predict_prices(product_name, months_ahead=6):
-    file_path = r"C:\Users\Sofia\equipo-1-ings-202520\server\data\precios_productos_limpio.csv"
+    file_path = DATA_PATH
     print(f" Verificando archivo: {file_path}")
 
     try:
@@ -120,6 +125,60 @@ def predict_prices(product_name, months_ahead=6):
     preds.columns = ["Fecha", "Precio estimado (por Kg)", "Mínimo estimado", "Máximo estimado"]
     preds["Nivel de confianza (%)"] = 95.0
 
+    # Generate interactive plot
+    try:
+        fig = go.Figure()
+
+        # Historic data
+        fig.add_trace(go.Scatter(
+            x=product_df["ds"],
+            y=product_df["y"] * (y_max - y_min) + y_min,
+            mode='lines',
+            name='Histórico',
+            line=dict(color='blue')
+        ))
+
+        # Central prediction line
+        fig.add_trace(go.Scatter(
+            x=forecast["ds"],
+            y=forecast["yhat"],
+            mode='lines',
+            name='Predicción',
+            line=dict(color='orange')
+        ))
+
+        # Limits
+        fig.add_trace(go.Scatter(
+            x=forecast["ds"],
+            y=forecast["yhat_upper"],
+            mode='lines',
+            name='Límite superior',
+            line=dict(color='lightgrey')
+        ))
+        fig.add_trace(go.Scatter(
+            x=forecast["ds"],
+            y=forecast["yhat_lower"],
+            mode='lines',
+            name='Límite inferior',
+            line=dict(color='lightgrey', dash='dash')
+        ))
+
+        fig.update_layout(
+            title=f"Predicción de precios para {product_name}",
+            xaxis_title="Fecha",
+            yaxis_title="Precio por Kg",
+            template="plotly_white",
+            legend=dict(x=0, y=1.1, orientation="h")
+        )
+
+        # Save the plot
+        plot_path = os.path.join(BASE_DIR, "data", f"prediccion_{product_name.lower().replace(' ', '_')}.html")
+        fig.write_html(plot_path)
+        print(f" Gráfica interactiva guardada en: {plot_path}")
+
+    except Exception as e:
+        print(f" Error al generar o guardar la gráfica: {e}")
+
     # Visual formatting
     for col in ["Precio estimado (por Kg)", "Mínimo estimado", "Máximo estimado"]:
         preds[col] = preds[col].apply(lambda x: f"${x:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
@@ -177,5 +236,5 @@ def predict_prices(product_name, months_ahead=6):
 
 # Execute example prediction
 if __name__ == "__main__":
-    result = predict_prices("Harina De Trigo", months_ahead=6)
+    result = predict_prices("Aguacate Común", months_ahead=6)
     print(result)
