@@ -9,7 +9,7 @@ Note:
     Column names in Spanish are maintained to match the existing database schema.
 """
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Date, DECIMAL, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Date, DECIMAL, ForeignKey, Text, TIMESTAMP
 from sqlalchemy.orm import relationship
 from database import Base
 from datetime import datetime
@@ -143,10 +143,14 @@ class PlazaMercado(Base):
 
     plaza_id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, nullable=False)
-    direccion = Column(String, nullable=True)
+    direccion = Column(String, nullable=True)                # <- agregado
     ciudad = Column(String, nullable=False)
-    coordenadas = Column(String, nullable=True)
-    estado = Column(String, default="activa") 
+    coordenadas = Column(String, nullable=True)               # si quieres usar POINT, cambia a dialecto
+    estado = Column(String, default="activa")
+    horarios = Column(String, nullable=True)                  # <- agregado
+    numero_comerciantes = Column(Integer, nullable=True)      # <- agregado
+    tipos_productos = Column(Text, nullable=True)             # <- agregado (texto que puede ser CSV o JSON)
+    datos_contacto = Column(String, nullable=True)            # <- agregado
     fecha_creacion = Column(DateTime, default=datetime.utcnow)
     fecha_actualizacion = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
