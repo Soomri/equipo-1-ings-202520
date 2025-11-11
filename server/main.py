@@ -20,7 +20,6 @@ from routers_.price_history import router as price_history_router
 from routers_.markets import router as markets_router
 from routers_.prediction_routes import router as prediction_router
 from routers_ import plaza_router
-from routers_ import plaza_router
 
 # Load environment variables
 load_dotenv()
@@ -82,7 +81,6 @@ app.include_router(maintenance_router)
 app.include_router(price_history_router)
 app.include_router(markets_router, tags=["Markets"]) 
 app.include_router(prediction_router)
-app.include_router(plaza_router.router)
 app.include_router(plaza_router.router)
 
 @app.get("/")
