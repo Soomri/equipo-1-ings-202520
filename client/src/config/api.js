@@ -174,6 +174,16 @@ export const plazaService = {
     } catch (error) {
       throw new Error(`Error getting plaza details: ${error.message}`)
     }
+  },
+
+  // Get all markets in Medellín
+  getMedellinMarkets: async () => {
+    try {
+      const response = await api.get('/prices/markets/medellin/')
+      return response.data
+    } catch (error) {
+      throw new Error(`Error getting Medellín markets: ${error.message}`)
+    }
   }
 }
 

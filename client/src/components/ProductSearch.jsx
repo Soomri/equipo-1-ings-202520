@@ -12,18 +12,20 @@ const ProductSearch = () => {
   const [showFilters, setShowFilters] = useState(false)
   const [plazas, setPlazas] = useState([])
 
-  // Fetch available plazas when component mounts
+  // Fetch available plazas only when filters are shown
   useEffect(() => {
-    const fetchPlazas = async () => {
-      try {
-        const options = await productService.getOptions()
-        setPlazas(options.plazas || [])
-      } catch (error) {
-        console.error('Error loading plazas:', error)
+    if (showFilters && plazas.length === 0) {
+      const fetchPlazas = async () => {
+        try {
+          const options = await productService.getOptions()
+          setPlazas(options.plazas || [])
+        } catch (error) {
+          console.error('Error loading plazas:', error)
+        }
       }
+      fetchPlazas()
     }
-    fetchPlazas()
-  }, [])
+  }, [showFilters])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -58,14 +60,77 @@ const ProductSearch = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg p-10 mx-auto shadow-lg" style={{ width: '1100px' }}>
-      <form onSubmit={handleSubmit} className="space-y-8">
+    <>
+      <style>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @media (max-width: 1200px) {
+          .product-search-container {
+            width: 95% !important;
+            max-width: 1100px !important;
+          }
+          .product-search-input {
+            width: 550px !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .product-search-container {
+            width: 95% !important;
+            padding: 2rem 1.5rem !important;
+          }
+          .product-search-input {
+            width: 100% !important;
+            max-width: 500px !important;
+          }
+          .product-search-button {
+            width: 250px !important;
+          }
+          .filter-button-container {
+            margin-left: 0 !important;
+            justify-content: center !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .product-search-container {
+            padding: 1.5rem 1rem !important;
+            border-radius: 12px !important;
+          }
+          .product-search-input {
+            width: 100% !important;
+            max-width: 100% !important;
+            font-size: 1rem !important;
+            padding: 10px 16px !important;
+          }
+          .product-search-button {
+            width: 200px !important;
+            font-size: 1.125rem !important;
+            padding: 8px !important;
+          }
+          .filter-button {
+            font-size: 13px !important;
+            padding: 6px 14px !important;
+          }
+          .filter-section {
+            padding: 1.25rem !important;
+          }
+        }
+      `}</style>
+      <div className="bg-white rounded-lg p-10 mx-auto shadow-lg product-search-container" style={{ width: '1100px' }}>
+        <form onSubmit={handleSubmit} className="space-y-8">
         {/* Filter Button - Above Search, Aligned Left */}
-        <div className="flex items-center gap-3" style={{ marginLeft: '225px', marginBottom: '20px' }}>
+        <div className="flex items-center gap-3 filter-button-container" style={{ marginLeft: '225px', marginBottom: '20px' }}>
           <button 
             type="button"
             onClick={toggleFilters}
-            className="flex items-center gap-2 transition-all"
+            className="flex items-center gap-2 transition-all filter-button"
             style={{ 
               padding: '8px 18px',
               borderRadius: '8px',
@@ -151,7 +216,7 @@ const ProductSearch = () => {
             value={searchData.product}
             onChange={(e) => handleInputChange('product', e.target.value)}
             placeholder="Buscar producto (ej: Tomate, Papa criolla...)"
-            className="border border-gray-300 text-xl focus:outline-none focus:ring-2 focus:ring-primary-color focus:border-transparent"
+            className="border border-gray-300 text-xl focus:outline-none focus:ring-2 focus:ring-primary-color focus:border-transparent product-search-input"
             style={{ 
               borderRadius: '12px',
               width: '650px',
@@ -169,6 +234,7 @@ const ProductSearch = () => {
         {/* Advanced Filters Section */}
         {showFilters && (
           <div 
+            className="filter-section"
             style={{
               backgroundColor: '#f9f9f9',
               borderRadius: '12px',
@@ -277,7 +343,7 @@ const ProductSearch = () => {
           <button
             type="submit"
             disabled={!searchData.product.trim()}
-            className="text-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed product-search-button"
             style={{ 
               backgroundColor: '#D2EDCC',
               color: '#333',
@@ -291,20 +357,8 @@ const ProductSearch = () => {
           </button>
         </div>
       </form>
-
-      <style>{`
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
-    </div>
+      </div>
+    </>
   )
 }
 
