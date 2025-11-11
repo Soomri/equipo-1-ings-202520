@@ -21,6 +21,7 @@ from typing import Optional
 # ==========================
 # 👤 User-related models
 # ==========================
+
 class User(Base):
     """
     ORM model for the users table.
@@ -93,34 +94,23 @@ class EmailLink(Base):
 # ==========================
 # 🏪 Market-related models
 # ==========================
-class Price(Base):
+
+class Precio(Base):
     """
-    ORM model for product prices at different markets.
-
-    This model tracks historical and current prices of products across
-    various market locations, enabling price comparison and trend analysis.
-
-    Attributes:
-        price_id (int): Primary key, unique price record identifier.
-        product_id (int): Foreign key referencing the product.
-        market_id (int): Foreign key referencing the market location.
-        price_per_kg (Decimal): Price per kilogram with 2 decimal precision.
-        date (Date): Date when this price was recorded.
-        producto (relationship): Many-to-one relationship with Producto model.
-        plaza (relationship): Many-to-one relationship with PlazaMercado model.
-
-    Relationships:
-        producto: The product associated with this price.
-        plaza: The market where this price was recorded.
+    ORM model for product prices at different markets (tabla: precios).
     """
 
     __tablename__ = "precios"
 
-    price_id = Column(Integer, primary_key=True, index=True)
-    product_id = Column(Integer, ForeignKey("productos.producto_id"), nullable=False)
-    market_id = Column(Integer, ForeignKey("plazas_mercado.plaza_id"), nullable=False)
-    price_per_kg = Column(DECIMAL(10, 2), nullable=False)
-    date = Column(Date, nullable=False)
+    precio_id = Column(Integer, primary_key=True, index=True)
+    producto_id = Column(Integer, ForeignKey("productos.producto_id"), nullable=False)
+    plaza_id = Column(Integer, ForeignKey("plazas_mercado.plaza_id", ondelete="CASCADE"), nullable=False)
+    precio_por_kg = Column(DECIMAL(10, 2), nullable=False)
+    tendencia = Column(String, nullable=True)
+    fecha = Column(Date, nullable=False)
+    fuente_dato = Column(String, nullable=True)
+    fecha_creacion = Column(DateTime(timezone=True), server_default=func.now())
+    fecha_actualizacion = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
 
     producto = relationship("Producto", back_populates="precios")
     plaza = relationship("PlazaMercado", back_populates="precios")
@@ -147,11 +137,12 @@ class PlazaMercado(Base):
     fecha_actualizacion = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
 
     # Inverse relationship to Price model
-    precios = relationship("Price", back_populates="plaza")
+    precios = relationship("Precio", back_populates="plaza", cascade="all, delete-orphan")
 
 # =============================
 # Pydantic Model (for request)
 # =============================
+
 class PlazaCreate(BaseModel):
     nombre: str
     direccion: str
@@ -184,4 +175,4 @@ class Producto(Base):
     producto_id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, unique=True, nullable=False)
 
-    precios = relationship("Price", back_populates="producto")
+    precios = relationship("Precio", back_populates="producto")

@@ -45,3 +45,26 @@ def update_marketplace(plaza_id: int, plaza_data: PlazaUpdate, db: Session):
     db.commit()
     db.refresh(plaza)
     return plaza
+
+def delete_marketplace(plaza_id: int, db: Session):
+    """
+    Deletes a marketplace from the database by its ID.
+    """
+    plaza = db.query(PlazaMercado).filter(PlazaMercado.plaza_id == plaza_id).first()
+
+    if not plaza:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Plaza no encontrada"
+        )
+
+    try:
+        db.delete(plaza)
+        db.commit()
+        return {"mensaje": f"La plaza con ID {plaza_id} fue eliminada exitosamente."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al eliminar la plaza: {str(e)}"
+        )

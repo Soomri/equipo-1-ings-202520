@@ -65,3 +65,16 @@ def update_marketplace(
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al actualizar la plaza: {str(e)}")
+    
+@router.delete("/{plaza_id}", status_code=status.HTTP_200_OK)
+def delete_marketplace(
+    plaza_id: int,
+    db: Session = Depends(get_db),
+    current_admin: dict = Depends(get_current_admin_user)
+):
+    """
+    Deletes a marketplace (plaza de mercado) by its ID.
+    Only authorized admin users can perform this action.
+    """
+    result = plazas_service.delete_marketplace(plaza_id, db)
+    return result
