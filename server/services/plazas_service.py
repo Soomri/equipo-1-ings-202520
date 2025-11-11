@@ -1,12 +1,13 @@
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from models import PlazaMercado, PlazaCreate
+from schemas.plazas import PlazaUpdate
 
-def crear_plaza_service(db: Session, plaza_data: PlazaCreate):
+def create_marketplace_service(db: Session, plaza_data: PlazaCreate):
     """
     Create a new marketplace in the database.
     """
-    nueva_plaza = PlazaMercado(
+    new_marketplace = PlazaMercado(
         nombre=plaza_data.nombre,
         direccion=plaza_data.direccion,
         ciudad=plaza_data.ciudad,
@@ -19,10 +20,28 @@ def crear_plaza_service(db: Session, plaza_data: PlazaCreate):
     )
 
     try:
-        db.add(nueva_plaza)
+        db.add(new_marketplace)
         db.commit()
-        db.refresh(nueva_plaza)
-        return nueva_plaza
+        db.refresh(new_marketplace)
+        return new_marketplace
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error al crear la plaza: {str(e)}")
+    
+def update_marketplace(plaza_id: int, plaza_data: PlazaUpdate, db: Session):
+    plaza = db.query(PlazaMercado).filter(PlazaMercado.plaza_id == plaza_id).first()
+    if not plaza:
+        raise HTTPException(status_code=404, detail="Plaza no encontrada")
+
+    # Update only the fields provided in plaza_data
+    for key, value in plaza_data.dict(exclude_unset=True).items():
+        if key == "coordenadas" and value is not None:
+            # Converts to string format "(lat,lon)"
+            lat, lon = value["lat"], value["lon"]
+            setattr(plaza, key, f"({lat},{lon})")
+        else:
+            setattr(plaza, key, value)
+
+    db.commit()
+    db.refresh(plaza)
+    return plaza

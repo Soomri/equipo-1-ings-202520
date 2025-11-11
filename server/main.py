@@ -8,14 +8,17 @@ functional domains (authentication, prices, health checks, etc.).
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware  # CORS middleware for cross-origin requests
+from fastapi.security import HTTPBearer
 from routers_.user_registration import router as user_registration_router
 from routers_ import auth, password_recovery
 from routers_.prices import router as prices_router
 from database import Base, engine
 from dotenv import load_dotenv
+from routers_ import plazas_routes, auth
 from routers_.health_routes import router as health_router
 from routers_.maintenance_routes import router as maintenance_router
 from routers_.price_history import router as price_history_router
+from routers_.auth import router as auth_router
 from routers_.plazas_routes import router as plazas_router
 
 # Load environment variables
@@ -25,6 +28,8 @@ load_dotenv()
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Market Prices Plaze API 🛒")
+
+bearer_scheme = HTTPBearer()
 
 # ========================================
 # CORS Configuration
@@ -48,13 +53,13 @@ app.add_middleware(
 
 # Include routers
 app.include_router(user_registration_router)
-app.include_router(auth.router, tags=["Auth"])
+app.include_router(auth.router)
 app.include_router(password_recovery.router, tags=["Password Recovery"])
 app.include_router(prices_router, tags=["Prices"])
 app.include_router(health_router)
 app.include_router(maintenance_router)
 app.include_router(price_history_router)
-app.include_router(plazas_router, tags=["Plazas de Mercado"])
+app.include_router(plazas_routes.router)
 
 
 @app.get("/")
