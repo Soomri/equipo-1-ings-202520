@@ -8,6 +8,11 @@ import RegisterConfirmationPage from './pages/RegisterConfirmationPage'
 import PasswordRecoveryPage from './pages/PasswordRecoveryPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import ProductDetailPage from './pages/ProductDetailPage'
+import AdminPlazasPage from './pages/AdminPlazasPage'
+import AdminPlazasListPage from './pages/AdminPlazasListPage'
+import AdminPlazasCreatePage from './pages/AdminPlazasCreatePage'
+import AdminPlazasEditPage from './pages/AdminPlazasEditPage'
+import AdminPlazasDeletePage from './pages/AdminPlazasDeletePage'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import PageTransition from './components/PageTransition'
@@ -20,10 +25,11 @@ import PageTransition from './components/PageTransition'
 function AppContent() {
   const location = useLocation()
   
-  // Hide header and footer on authentication pages and landing page (they have their own)
-  const pagesWithoutLayout = ['/', '/login', '/register', '/register-confirmation', '/password-recovery', '/reset-password']
-  const showHeader = !pagesWithoutLayout.includes(location.pathname) && !location.pathname.startsWith('/reset-password/')
-  const showFooter = !pagesWithoutLayout.includes(location.pathname) && !location.pathname.startsWith('/reset-password/')
+  // Hide header and footer on authentication pages, landing page, home page, and product detail page
+  const pagesWithoutHeader = ['/', '/login', '/register', '/register-confirmation', '/password-recovery', '/reset-password']
+  const pagesWithoutFooter = ['/', '/home', '/login', '/register', '/register-confirmation', '/password-recovery', '/reset-password']
+  const showHeader = !pagesWithoutHeader.includes(location.pathname) && !location.pathname.startsWith('/reset-password/')
+  const showFooter = !pagesWithoutFooter.includes(location.pathname) && !location.pathname.startsWith('/reset-password/') && !location.pathname.startsWith('/product/')
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -39,6 +45,11 @@ function AppContent() {
             <Route path="/password-recovery" element={<PasswordRecoveryPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/product/:productName" element={<ProductDetailPage />} />
+            <Route path="/admin/plazas" element={<AdminPlazasPage />} />
+            <Route path="/admin/plazas/list" element={<AdminPlazasListPage />} />
+            <Route path="/admin/plazas/create" element={<AdminPlazasCreatePage />} />
+            <Route path="/admin/plazas/edit" element={<AdminPlazasEditPage />} />
+            <Route path="/admin/plazas/delete" element={<AdminPlazasDeletePage />} />
           </Routes>
         </PageTransition>
       </main>

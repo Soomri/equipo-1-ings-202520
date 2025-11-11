@@ -6,9 +6,200 @@ import Footer from '../components/Footer'
 const LandingPage = () => {
   const navigate = useNavigate()
   return (
-    <div style={{ minHeight: '2880px', backgroundColor: '#FFFFFF' }}>
-      {/* Header */}
-      <LandingHeader />
+    <>
+      <style>{`
+        @media (max-width: 1200px) {
+          .landing-hero-section {
+            width: 90% !important;
+            padding: 40px 50px !important;
+          }
+          .landing-about-section {
+            width: 90% !important;
+            height: auto !important;
+            padding: 20px 30px !important;
+          }
+          .landing-team-section {
+            width: 90% !important;
+            padding: 40px 40px !important;
+          }
+          .landing-legal-container {
+            width: 90% !important;
+          }
+        }
+        @media (max-width: 992px) {
+          .landing-hero-title {
+            font-size: 36px !important;
+            max-width: 90% !important;
+          }
+          .landing-hero-section {
+            width: 95% !important;
+            height: auto !important;
+            padding: 30px 30px !important;
+          }
+          .landing-plaze-title {
+            font-size: 48px !important;
+          }
+          .landing-description {
+            font-size: 22px !important;
+          }
+          .landing-features {
+            flex-direction: column !important;
+            gap: 30px !important;
+          }
+          .landing-feature-image {
+            width: 300px !important;
+            height: 300px !important;
+          }
+          .landing-feature-circle {
+            width: 300px !important;
+            height: 300px !important;
+            padding: 40px !important;
+          }
+          .landing-feature-text {
+            font-size: 20px !important;
+          }
+          .landing-about-content {
+            flex-direction: column !important;
+            gap: 20px !important;
+          }
+          .landing-about-image-wrapper {
+            margin-left: 0 !important;
+          }
+          .landing-about-image {
+            width: 250px !important;
+            height: 250px !important;
+          }
+          .landing-about-text-box {
+            width: 100% !important;
+            height: auto !important;
+            margin-right: 0 !important;
+          }
+          .landing-team-content {
+            flex-direction: column !important;
+          }
+          .landing-team-image {
+            width: 280px !important;
+            height: 280px !important;
+          }
+          .landing-legal-container {
+            flex-direction: column !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .landing-hero-title {
+            font-size: 28px !important;
+            margin-bottom: 40px !important;
+          }
+          .landing-hero-section {
+            padding: 20px 20px !important;
+          }
+          .landing-plaze-title {
+            font-size: 38px !important;
+          }
+          .landing-description {
+            font-size: 18px !important;
+          }
+          .landing-feature-image {
+            width: 250px !important;
+            height: 250px !important;
+            border-radius: 36px !important;
+          }
+          .landing-feature-circle {
+            width: 250px !important;
+            height: 250px !important;
+            padding: 30px !important;
+          }
+          .landing-feature-text {
+            font-size: 18px !important;
+          }
+          .landing-register-button {
+            width: 220px !important;
+            height: 56px !important;
+            font-size: 18px !important;
+          }
+          .landing-section-title {
+            font-size: 38px !important;
+          }
+          .landing-about-text {
+            font-size: 18px !important;
+          }
+          .landing-legal-title {
+            font-size: 28px !important;
+          }
+          .landing-legal-text {
+            font-size: 13px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .landing-hero-title {
+            font-size: 22px !important;
+            margin-bottom: 30px !important;
+            padding: 0 10px !important;
+          }
+          .landing-hero-section {
+            padding: 15px 15px !important;
+            border-radius: 16px !important;
+          }
+          .landing-plaze-title {
+            font-size: 32px !important;
+          }
+          .landing-description {
+            font-size: 16px !important;
+          }
+          .landing-feature-image {
+            width: 200px !important;
+            height: 200px !important;
+          }
+          .landing-feature-circle {
+            width: 200px !important;
+            height: 200px !important;
+            padding: 20px !important;
+          }
+          .landing-feature-text {
+            font-size: 16px !important;
+          }
+          .landing-register-button {
+            width: 200px !important;
+            height: 50px !important;
+            font-size: 16px !important;
+          }
+          .landing-section-title {
+            font-size: 30px !important;
+          }
+          .landing-about-section {
+            border-radius: 36px !important;
+          }
+          .landing-about-image {
+            width: 200px !important;
+            height: 200px !important;
+          }
+          .landing-about-text-box {
+            border-radius: 36px !important;
+            padding: 25px 20px !important;
+          }
+          .landing-about-text {
+            font-size: 16px !important;
+          }
+          .landing-team-section {
+            border-radius: 36px !important;
+            padding: 30px 20px !important;
+          }
+          .landing-team-image {
+            width: 220px !important;
+            height: 220px !important;
+          }
+          .landing-legal-box {
+            border-radius: 36px !important;
+            padding: 30px 20px !important;
+          }
+          .landing-legal-title {
+            font-size: 24px !important;
+          }
+        }
+      `}</style>
+      <div style={{ minHeight: '2880px', backgroundColor: '#FFFFFF' }}>
+        {/* Header */}
+        <LandingHeader />
 
       {/* Main content container */}
       <div style={{ 
@@ -18,7 +209,7 @@ const LandingPage = () => {
         paddingTop: '58px'
       }}>
         {/* Hero title */}
-        <h1 style={{
+        <h1 className="landing-hero-title" style={{
           fontSize: '46px',
           fontWeight: '700',
           color: '#4CA772',
@@ -31,7 +222,7 @@ const LandingPage = () => {
         </h1>
 
         {/* Hero section */}
-        <div style={{
+        <div className="landing-hero-section" style={{
           width: '1008px',
           height: '688px',
           backgroundColor: 'rgba(248, 231, 176, 0.6)',
@@ -42,7 +233,7 @@ const LandingPage = () => {
           alignItems: 'center'
         }}>
           {/* Logo text */}
-          <h2 style={{
+          <h2 className="landing-plaze-title" style={{
             fontSize: '58px',
             fontWeight: '700',
             color: '#4CA772',
@@ -54,7 +245,7 @@ const LandingPage = () => {
           </h2>
 
           {/* Description */}
-          <p style={{
+          <p className="landing-description" style={{
             fontSize: '26px',
             color: '#000000',
             textAlign: 'center',
@@ -66,7 +257,7 @@ const LandingPage = () => {
           </p>
 
           {/* Features showcase */}
-          <div style={{
+          <div className="landing-features" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '58px',
@@ -75,6 +266,7 @@ const LandingPage = () => {
           }}>
             {/* Feature image */}
             <img
+              className="landing-feature-image"
               src="/client_images/LandingPageImage1.png"
               alt="Plaze Products"
               style={{
@@ -87,7 +279,7 @@ const LandingPage = () => {
             />
 
             {/* Feature description circle */}
-            <div style={{
+            <div className="landing-feature-circle" style={{
               width: '400px',
               height: '400px',
               backgroundColor: '#D2EDCC',
@@ -97,7 +289,7 @@ const LandingPage = () => {
               justifyContent: 'center',
               padding: '58px'
             }}>
-              <p style={{
+              <p className="landing-feature-text" style={{
                 fontSize: '23px',
                 color: '#000000',
                 fontWeight: '700',
@@ -154,7 +346,7 @@ const LandingPage = () => {
             `}
           </style>
           <button
-            className="register-button"
+            className="register-button landing-register-button"
             onClick={() => navigate('/register')}
             style={{
               width: '280px',
@@ -194,17 +386,18 @@ const LandingPage = () => {
         </div>
 
         {/* About section */}
-        <div style={{
+        <div id="acerca-de-plaze" className="landing-about-section" style={{
           width: '1008px',
           height: '480px',
           backgroundColor: '#FEEAA9',
           borderRadius: '72px',
           marginTop: '44px',
           position: 'relative',
-          padding: '21px 34px 42px 34px'
+          padding: '21px 34px 42px 34px',
+          scrollMarginTop: '120px'
         }}>
           {/* Section title */}
-          <h3 style={{
+          <h3 className="landing-section-title" style={{
             fontSize: '51px',
             fontWeight: '700',
             color: '#000000',
@@ -214,19 +407,23 @@ const LandingPage = () => {
           </h3>
 
           {/* Content layout */}
-          <div style={{
+          <div className="landing-about-content" style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-end',
             height: 'calc(100% - 96px)'
           }}>
             {/* About image */}
-            <div style={{
-              marginLeft: '37px'
+            <div className="landing-about-image-wrapper" style={{
+              marginLeft: '37px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
             }}>
               <img
                 src="/client_images/LandingPageAboutPlaze.png"
                 alt="About Plaze"
+                className="landing-about-image"
                 style={{
                   width: '328px',
                   height: '328px',
@@ -237,7 +434,7 @@ const LandingPage = () => {
             </div>
 
             {/* About text box */}
-            <div style={{
+            <div className="landing-about-text-box" style={{
               width: '492px',
               height: '416px',
               backgroundColor: '#FFFFFF',
@@ -250,7 +447,7 @@ const LandingPage = () => {
               marginRight: '4px',
               boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.15)'
             }}>
-              <p style={{
+              <p className="landing-about-text" style={{
                 fontSize: '20px',
                 color: '#2B2B2B',
                 lineHeight: '1.6',
@@ -259,7 +456,7 @@ const LandingPage = () => {
               }}>
                 Plaze conecta a los colombianos con <strong style={{ color: '#000000' }}>información actualizada de precios de alimentos</strong>, ayudando a las familias a <strong style={{ color: '#000000' }}>optimizar su presupuesto</strong>. Transformamos datos complejos de las principales plazas de mercado en información clara y accesible para que tomes las <strong style={{ color: '#000000' }}>mejores decisiones de compra</strong>.
               </p>
-              <p style={{
+              <p className="landing-about-text" style={{
                 fontSize: '20px',
                 color: '#2B2B2B',
                 lineHeight: '1.6',
@@ -273,17 +470,18 @@ const LandingPage = () => {
         </div>
 
         {/* Team section */}
-        <div style={{
+        <div id="quienes-somos" className="landing-team-section" style={{
           width: '1008px',
           backgroundColor: '#F6D182',
           borderRadius: '72px',
           marginTop: '72px',
           padding: '43px 58px',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          scrollMarginTop: '120px'
         }}>
           {/* Section title */}
-          <h3 style={{
+          <h3 className="landing-section-title" style={{
             fontSize: '51px',
             fontWeight: '700',
             color: '#000000',
@@ -294,7 +492,7 @@ const LandingPage = () => {
           </h3>
 
           {/* Team content */}
-          <div style={{
+          <div className="landing-team-content" style={{
             display: 'flex',
             gap: '43px',
             alignItems: 'center'
@@ -304,7 +502,7 @@ const LandingPage = () => {
               flex: 1,
               paddingRight: '14px'
             }}>
-              <p style={{
+              <p className="landing-about-text" style={{
                 fontSize: '20px',
                 color: '#000000',
                 lineHeight: '1.6',
@@ -313,7 +511,7 @@ const LandingPage = () => {
                 Somos estudiantes de Ingeniería en Ciencia de Datos que creemos en hacer la información accesible para todos los colombianos.
               </p>
               <br />
-              <p style={{
+              <p className="landing-about-text" style={{
                 fontSize: '20px',
                 color: '#000000',
                 lineHeight: '1.6',
@@ -330,6 +528,7 @@ const LandingPage = () => {
               justifyContent: 'center'
             }}>
               <img
+                className="landing-team-image"
                 src="/client_images/LandingPageAboutUs.png"
                 alt="About Us"
                 style={{
@@ -344,7 +543,7 @@ const LandingPage = () => {
         </div>
 
         {/* Legal and info sections */}
-        <div style={{
+        <div className="landing-legal-container" style={{
           width: '1008px',
           display: 'flex',
           gap: '29px',
@@ -352,15 +551,16 @@ const LandingPage = () => {
           marginBottom: '72px'
         }}>
           {/* Terms box */}
-          <div style={{
+          <div id="terminos-condiciones" className="landing-legal-box" style={{
             flex: 1,
             backgroundColor: '#D49A1D',
             borderRadius: '72px',
             padding: '43px 36px',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            scrollMarginTop: '120px'
           }}>
-            <h3 style={{
+            <h3 className="landing-legal-title" style={{
               fontSize: '35px',
               fontWeight: '700',
               color: '#FEEAA9',
@@ -369,7 +569,7 @@ const LandingPage = () => {
             }}>
               Términos y condiciones
             </h3>
-            <p style={{
+            <p className="landing-legal-text" style={{
               fontSize: '14px',
               color: '#000000',
               lineHeight: '1.6',
@@ -380,15 +580,16 @@ const LandingPage = () => {
           </div>
 
           {/* Data source box */}
-          <div style={{
+          <div id="fuente-datos" className="landing-legal-box" style={{
             flex: 1,
             backgroundColor: '#D49A1D',
             borderRadius: '72px',
             padding: '43px 36px',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            scrollMarginTop: '120px'
           }}>
-            <h3 style={{
+            <h3 className="landing-legal-title" style={{
               fontSize: '35px',
               fontWeight: '700',
               color: '#FEEAA9',
@@ -397,7 +598,7 @@ const LandingPage = () => {
             }}>
               Fuente de Datos
             </h3>
-            <p style={{
+            <p className="landing-legal-text" style={{
               fontSize: '14px',
               color: '#000000',
               lineHeight: '1.6',
@@ -406,7 +607,7 @@ const LandingPage = () => {
             }}>
               La información de precios presentada en Plaze proviene de datos oficiales recopilados por el Departamento Administrativo Nacional de Estadística (DANE), entidad encargada de la producción, análisis y difusión de información estadística oficial en Colombia.
             </p>
-            <p style={{
+            <p className="landing-legal-text" style={{
               fontSize: '14px',
               color: '#000000',
               lineHeight: '1.6',
@@ -420,7 +621,8 @@ const LandingPage = () => {
 
       {/* Footer */}
       <Footer />
-    </div>
+      </div>
+    </>
   )
 }
 

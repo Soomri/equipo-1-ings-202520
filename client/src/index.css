@@ -18,6 +18,25 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Improve placeholder contrast for better UX */
+input::placeholder,
+textarea::placeholder {
+  color: #666666;
+  opacity: 1;
+}
+
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+  color: #666666;
+  opacity: 1;
+}
+
+input::-moz-placeholder,
+textarea::-moz-placeholder {
+  color: #666666;
+  opacity: 1;
+}
+
 /* CSS variables for theme colors */
 :root {
   --primary-color: #4CAF50;

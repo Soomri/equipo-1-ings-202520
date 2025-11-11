@@ -58,32 +58,88 @@ const PasswordRecoveryPage = () => {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#FFFFFF',
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'relative'
-    }}>
-      {/* Logo in top left corner */}
+    <>
+      <style>{`
+        @media (max-width: 850px) {
+          .recovery-container {
+            width: 90% !important;
+            max-width: 600px !important;
+            padding: 40px 30px !important;
+          }
+          .recovery-title {
+            font-size: 36px !important;
+            margin-top: 60px !important;
+          }
+          .recovery-success-box {
+            width: 90% !important;
+            max-width: 800px !important;
+            padding: 40px 30px !important;
+          }
+          .logo-container {
+            left: 20px !important;
+          }
+          .logo-image {
+            height: 150px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .recovery-container {
+            width: 95% !important;
+            padding: 30px 20px !important;
+          }
+          .recovery-title {
+            font-size: 28px !important;
+            margin-top: 40px !important;
+          }
+          .recovery-description {
+            font-size: 16px !important;
+          }
+          .recovery-button {
+            width: 160px !important;
+            height: 45px !important;
+            font-size: 20px !important;
+          }
+          .recovery-success-box {
+            width: 95% !important;
+            padding: 30px 20px !important;
+            height: auto !important;
+            min-height: 200px !important;
+          }
+          .recovery-success-text {
+            font-size: 16px !important;
+          }
+          .logo-image {
+            height: 120px !important;
+          }
+        }
+      `}</style>
       <div style={{
-        position: 'absolute',
-        top: '10px',
-        left: '40px'
+        minHeight: '100vh',
+        backgroundColor: '#FFFFFF',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative'
       }}>
-        <Link to="/">
-          <img 
-            src="/client_images/Plaze-Logo.png" 
-            alt="Plaze Logo" 
-            style={{
-              height: '220px',
-              width: 'auto',
-              objectFit: 'contain',
-              cursor: 'pointer'
-            }}
-          />
-        </Link>
-      </div>
+        {/* Logo in top left corner */}
+        <div className="logo-container" style={{
+          position: 'absolute',
+          top: '10px',
+          left: '40px'
+        }}>
+          <Link to="/">
+            <img 
+              className="logo-image"
+              src="/client_images/Plaze-Logo.png" 
+              alt="Plaze Logo" 
+              style={{
+                height: '220px',
+                width: 'auto',
+                objectFit: 'contain',
+                cursor: 'pointer'
+              }}
+            />
+          </Link>
+        </div>
 
       {/* Main content centered */}
       <div style={{
@@ -96,7 +152,7 @@ const PasswordRecoveryPage = () => {
         gap: '40px'
       }}>
         {/* Page title */}
-        <h1 style={{
+        <h1 className="recovery-title" style={{
           fontSize: '48px',
           fontWeight: '600',
           textAlign: 'center',
@@ -109,7 +165,7 @@ const PasswordRecoveryPage = () => {
 
         {!emailSent ? (
           // Email input form
-          <div style={{
+          <div className="recovery-container" style={{
             width: '600px',
             backgroundColor: '#F5F5F5',
             border: '1px solid rgba(0, 0, 0, 0.25)',
@@ -120,7 +176,7 @@ const PasswordRecoveryPage = () => {
             flexDirection: 'column',
             alignItems: 'center'
           }}>
-            <p style={{
+            <p className="recovery-description" style={{
               fontSize: '18px',
               color: '#000000',
               textAlign: 'center',
@@ -132,24 +188,39 @@ const PasswordRecoveryPage = () => {
 
             <form onSubmit={handleSubmit} style={{ width: '100%' }}>
               {/* Email input field */}
-              <input
-                type="email"
-                placeholder="Correo electrónico"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-                style={{
-                  width: '100%',
-                  height: '65px',
-                  backgroundColor: 'rgba(217, 217, 217, 0.5)',
-                  border: '1px solid #000000',
-                  borderRadius: '4px',
-                  padding: '0 15px',
-                  fontSize: '18px',
-                  marginBottom: '20px',
-                  opacity: isLoading ? 0.6 : 1
-                }}
-              />
+              <div style={{ marginBottom: '20px' }}>
+                <label 
+                  htmlFor="recovery-email-input"
+                  style={{
+                    display: 'block',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    marginBottom: '8px',
+                    color: '#333'
+                  }}
+                >
+                  Correo electrónico
+                </label>
+                <input
+                  id="recovery-email-input"
+                  type="email"
+                  placeholder="Correo electrónico"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  style={{
+                    width: '100%',
+                    height: '65px',
+                    backgroundColor: 'rgba(217, 217, 217, 0.5)',
+                    border: '1px solid #000000',
+                    borderRadius: '4px',
+                    padding: '0 15px',
+                    fontSize: '18px',
+                    color: '#1a1a1a',
+                    opacity: isLoading ? 0.6 : 1
+                  }}
+                />
+              </div>
 
               {/* Error message */}
               {error && (
@@ -170,6 +241,7 @@ const PasswordRecoveryPage = () => {
               {/* Submit button */}
               <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <button
+                  className="recovery-button"
                   type="submit"
                   disabled={isLoading}
                   style={{
@@ -196,7 +268,7 @@ const PasswordRecoveryPage = () => {
           // Success message
           <>
             {/* Message box with mail icon */}
-            <div style={{
+            <div className="recovery-success-box" style={{
               position: 'relative',
               width: '800px',
               height: '250px',
@@ -238,7 +310,7 @@ const PasswordRecoveryPage = () => {
               </div>
 
               {/* Message text */}
-              <div style={{
+              <div className="recovery-success-text" style={{
                 flex: 1,
                 color: '#000000',
                 fontSize: '18px',
@@ -258,6 +330,7 @@ const PasswordRecoveryPage = () => {
 
             {/* Back to login button */}
             <button
+              className="recovery-button"
               onClick={handleBackToLogin}
               style={{
                 width: '250px',
@@ -279,7 +352,8 @@ const PasswordRecoveryPage = () => {
           </>
         )}
       </div>
-    </div>
+      </div>
+    </>
   )
 }
 
