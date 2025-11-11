@@ -143,14 +143,14 @@ class PlazaMercado(Base):
 
     plaza_id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, nullable=False)
-    direccion = Column(String, nullable=True)                # <- agregado
+    direccion = Column(String, nullable=True)
     ciudad = Column(String, nullable=False)
-    coordenadas = Column(String, nullable=True)               # si quieres usar POINT, cambia a dialecto
+    coordenadas = Column(String, nullable=True)
     estado = Column(String, default="activa")
-    horarios = Column(String, nullable=True)                  # <- agregado
-    numero_comerciantes = Column(Integer, nullable=True)      # <- agregado
-    tipos_productos = Column(Text, nullable=True)             # <- agregado (texto que puede ser CSV o JSON)
-    datos_contacto = Column(String, nullable=True)            # <- agregado
+    horarios = Column(String, nullable=True)
+    numero_comerciantes = Column(Integer, nullable=True)
+    tipos_productos = Column(Text, nullable=True)
+    datos_contacto = Column(String, nullable=True)
     fecha_creacion = Column(DateTime, default=datetime.utcnow)
     fecha_actualizacion = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -213,11 +213,11 @@ class Predicciones(Base):
     fecha_creacion = Column(DateTime, default=datetime.utcnow)
     fecha_actualizacion = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # 🔗 Relationships
+    # Relationships
     producto = relationship("Producto", backref="predicciones")
     plaza = relationship("PlazaMercado", backref="predicciones")
 
-    # 🧩 Constraints and indexes
+    # Constraints and indexes
     __table_args__ = (
         # Unique combination of product, plaza, and date
         # to prevent duplicate predictions for the same period
@@ -231,4 +231,3 @@ class Predicciones(Base):
         ),
         __import__('sqlalchemy').Index("idx_prediccion_fecha", "fecha_prediccion"),
     )
-
