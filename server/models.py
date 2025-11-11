@@ -9,10 +9,14 @@ Note:
     Column names in Spanish are maintained to match the existing database schema.
 """
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Date, DECIMAL, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Date, DECIMAL, ForeignKey, Text
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import DOUBLE_PRECISION
+from sqlalchemy.sql import func
 from database import Base
 from datetime import datetime
+from pydantic import BaseModel, Field
+from typing import Optional
 
 # ==========================
 # 👤 User-related models
@@ -44,7 +48,7 @@ class User(Base):
     nombre = Column(String, nullable=False)
     correo = Column(String, unique=True, index=True, nullable=False)
     contrasena_hash = Column(String, nullable=False)
-    rol = Column(String, default="usuario")  # e.g. "usuario" or "admin"
+    rol = Column(String, default="usuario")  # "usuario" or "admin"
     intentos_fallidos = Column(Integer, default=0)
     cuenta_bloqueada_hasta = Column(DateTime, nullable=True)
 
@@ -122,30 +126,41 @@ class Price(Base):
     plaza = relationship("PlazaMercado", back_populates="precios")
 
 
+# =============================
+# ORM Model (SQLAlchemy)
+# =============================
+
 class PlazaMercado(Base):
-    """
-    ORM model for market locations.
-
-    This model represents physical market locations where products are sold.
-    Each market can have multiple price records for different products.
-
-    Attributes:
-        plaza_id (int): Primary key, unique market identifier.
-        nombre (str): Market name.
-        ciudad (str): City where the market is located.
-        precios (relationship): One-to-many relationship with Price model.
-
-    Relationships:
-        precios: List of all price records for this market.
-    """
-
     __tablename__ = "plazas_mercado"
 
     plaza_id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, nullable=False)
+    direccion = Column(String, nullable=False)
     ciudad = Column(String, nullable=False)
+    coordenadas = Column(String, nullable=False)
+    estado = Column(String, default="activa")
+    horarios = Column(String, nullable=False)
+    numero_comerciantes = Column(Integer)
+    tipos_productos = Column(Text)
+    datos_contacto = Column(String)
+    fecha_creacion = Column(DateTime(timezone=True), server_default=func.now())
+    fecha_actualizacion = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
 
+    # Inverse relationship to Price model
     precios = relationship("Price", back_populates="plaza")
+
+# =============================
+# Pydantic Model (for request)
+# =============================
+class PlazaCreate(BaseModel):
+    nombre: str
+    direccion: str
+    ciudad: str
+    coordenadas: str
+    horarios: str
+    numero_comerciantes: Optional[int] = None
+    tipos_productos: Optional[str] = None
+    datos_contacto: Optional[str] = None
 
 
 class Producto(Base):

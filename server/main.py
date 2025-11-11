@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 from routers_.health_routes import router as health_router
 from routers_.maintenance_routes import router as maintenance_router
 from routers_.price_history import router as price_history_router
+from routers_.plazas_routes import router as plazas_router
 
 # Load environment variables
 load_dotenv()
@@ -31,6 +32,7 @@ app = FastAPI(title="Market Prices Plaze API 🛒")
 # Enable Cross-Origin Resource Sharing (CORS) to allow frontend requests
 # This is required for the React frontend to communicate with the API
 # Allowed origins include common development ports (3000, 5173)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -52,6 +54,8 @@ app.include_router(prices_router, tags=["Prices"])
 app.include_router(health_router)
 app.include_router(maintenance_router)
 app.include_router(price_history_router)
+app.include_router(plazas_router, tags=["Plazas de Mercado"])
+
 
 @app.get("/")
 def root():
