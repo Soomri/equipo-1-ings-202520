@@ -9,7 +9,7 @@ Note:
     Column names in Spanish are maintained to match the existing database schema.
 """
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Date, DECIMAL, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Date, DECIMAL, ForeignKey, Text, TIMESTAMP
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import DOUBLE_PRECISION
 from sqlalchemy.sql import func

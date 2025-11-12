@@ -10,7 +10,28 @@ const UserMenu = ({ userName = null }) => {
   
   // Get user info from localStorage
   const currentUser = authService.getCurrentUser()
-  const displayName = userName || currentUser.name || currentUser.email?.split('@')[0] || "Usuario"
+  const fullName = userName || currentUser.name || currentUser.email?.split('@')[0] || "Usuario"
+  // Backend returns 'admin' as the admin role
+  const isAdmin = currentUser.role === 'admin'
+  
+  // Debug: Log user role (can be removed in production)
+  console.log('UserMenu - Role:', currentUser.role, '| Is Admin:', isAdmin)
+  
+  // Process name: extract first name and truncate if necessary
+  const getDisplayName = (name) => {
+    // Extract first name (before first space)
+    const firstName = name.trim().split(' ')[0]
+    
+    // Limit to 15 characters and add ellipsis if needed
+    const maxLength = 15
+    if (firstName.length > maxLength) {
+      return firstName.substring(0, maxLength) + '...'
+    }
+    
+    return firstName
+  }
+  
+  const displayName = getDisplayName(fullName)
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -49,11 +70,29 @@ const UserMenu = ({ userName = null }) => {
   return (
     <div className="flex items-center" style={{ gap: '12px', position: 'relative' }} ref={menuRef}>
       {/* User Greeting (static text with icon) */}
-      <div className="flex items-center" style={{ gap: '8px' }}>
-        <User className="w-5 h-5" style={{ color: '#333' }} />
-        <span className="text-sm font-medium" style={{ color: '#333' }}>
-          Hola, {displayName}
-        </span>
+      <div className="flex items-center" style={{ gap: '8px', flexDirection: 'column', alignItems: 'flex-end' }}>
+        <div className="flex items-center" style={{ gap: '8px' }}>
+          <User className="w-5 h-5" style={{ color: '#333' }} />
+          <span className="text-sm font-medium" style={{ color: '#333' }}>
+            Hola, {displayName}
+          </span>
+        </div>
+        {/* Admin Badge */}
+        {isAdmin && (
+          <div style={{
+            backgroundColor: '#FF6B35',
+            color: '#FFFFFF',
+            fontSize: '10px',
+            fontWeight: '700',
+            padding: '2px 8px',
+            borderRadius: '12px',
+            letterSpacing: '0.5px',
+            boxShadow: '0 2px 4px rgba(255, 107, 53, 0.3)',
+            textTransform: 'uppercase'
+          }}>
+            Modo Admin
+          </div>
+        )}
       </div>
 
       {/* Dropdown Button */}

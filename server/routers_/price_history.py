@@ -5,6 +5,7 @@ This module provides a RESTful endpoint for retrieving and analyzing
 the historical price variation of products over a specified period.
 It uses the `historial_precios` table to include multiple time points
 and provides trend analysis, statistical summaries, and period detection.
+Now it also filters out products whose market (plaza) is inactive.
 """
 
 from fastapi import APIRouter, HTTPException, Query
@@ -20,29 +21,12 @@ router = APIRouter(
 )
 
 
+# ----------------------------- #
+#   Helper Functions            #
+# ----------------------------- #
+
 def find_similar_products(db, product_name: str, limit: int = 5) -> List[str]:
-    """
-    Find products with similar names using partial matching.
-
-    This function performs a case-insensitive search for products whose
-    names contain the search term. It's useful for suggesting alternatives
-    when an exact match is not found.
-
-    Args:
-        db: SQLAlchemy database session for executing queries.
-        product_name (str): The product name to search for (supports partial matches).
-        limit (int, optional): Maximum number of similar products to return.
-            Defaults to 5.
-
-    Returns:
-        List[str]: List of product names that match the search pattern.
-            Returns empty list if no matches found or if an error occurs.
-
-    Example:
-        >>> similar = find_similar_products(db, "tomate", limit=3)
-        >>> print(similar)
-        ['Tomate', 'Tomate cherry', 'Tomate de árbol']
-    """
+    """Find products with similar names using partial matching."""
     try:
         query = text("""
             SELECT DISTINCT prod.nombre
@@ -60,41 +44,7 @@ def find_similar_products(db, product_name: str, limit: int = 5) -> List[str]:
 
 
 def analyze_periods(history: List[Dict]) -> List[Dict]:
-    """
-    Analyze product price history to detect trend periods.
-
-    This function identifies consecutive periods where prices follow a
-    consistent trend (increase, decrease, or stability) and calculates
-    the percentage variation for each period.
-
-    Args:
-        history (List[Dict]): List of historical price records, each containing:
-            - fecha (str): Date in ISO format
-            - precio_por_kg (float): Price per kilogram
-
-    Returns:
-        List[Dict]: List of detected trend periods, each containing:
-            - fecha_inicio (str): Period start date
-            - fecha_fin (str): Period end date
-            - precio_inicio (float): Initial price
-            - precio_fin (float): Final price
-            - tendencia (str): Trend type ("Aumento", "Disminución", "Estabilidad")
-            - variacion_porcentual (float): Percentage change during the period
-
-    Example:
-        >>> history = [
-        ...     {"fecha": "2024-01-01", "precio_por_kg": 100},
-        ...     {"fecha": "2024-02-01", "precio_por_kg": 110},
-        ...     {"fecha": "2024-03-01", "precio_por_kg": 105}
-        ... ]
-        >>> periods = analyze_periods(history)
-        >>> print(periods[0]["tendencia"])
-        'Aumento'
-
-    Note:
-        A variation greater than 2% is considered an increase, less than -2%
-        is a decrease, and between -2% and 2% is considered stability.
-    """
+    """Detect consecutive trend periods (increase, decrease, stability)."""
     if len(history) < 2:
         return []
 
@@ -142,6 +92,10 @@ def analyze_periods(history: List[Dict]) -> List[Dict]:
 
     return periods
 
+
+# ----------------------------- #
+#   Main Endpoint               #
+# ----------------------------- #
 
 @router.get("/{product_name}")
 def get_price_history(

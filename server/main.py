@@ -6,7 +6,8 @@ creates database tables, and registers all API routers for different
 functional domains (authentication, prices, health checks, etc.).
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware  # CORS middleware for cross-origin requests
 from fastapi.security import HTTPBearer
 from routers_.user_registration import router as user_registration_router
@@ -50,6 +51,29 @@ app.add_middleware(
     allow_methods=["*"],              # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
     allow_headers=["*"],              # Allow all headers (including Authorization)
 )
+
+#  Global error handler  
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    # Handle forbidden access (403)
+    if exc.status_code == 403:
+        return JSONResponse(
+            status_code=403,
+            content={"detail": "Acceso prohibido: no tienes permisos o no estás autenticado."}
+        )
+    # Handle unauthorized access (401)
+    elif exc.status_code == 401:
+        return JSONResponse(
+            status_code=401,
+            content={"detail": "No estás autenticado o tu token no es válido."}
+        )
+    # Default behavior for other HTTP exceptions
+    else:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+        )
+
 
 # Include routers
 app.include_router(user_registration_router)

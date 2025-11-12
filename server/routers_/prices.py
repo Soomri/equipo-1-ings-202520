@@ -2,7 +2,8 @@
 Price routes module for product queries in market plazas.
 
 This module provides endpoints to query updated prices, list available
-products and market plazas in Medellín.
+products and market plazas in Medellín. 
+Now includes validation to ensure only active plazas are considered.
 """
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -12,14 +13,32 @@ from database import get_db
 
 router = APIRouter(prefix="/prices", tags=["Prices"])
 
+
 # --- Endpoint 1: Get the latest price ---
 @router.get("/latest/")
 def get_latest_price(product_name: str, market_name: str, db: Session = Depends(get_db)):
     """
     Retrieve the latest price for a given product and market in Medellín.
-    Handles misspellings or similar names by suggesting close matches.
+    Returns only if the market is active.
+    Suggests similar product names if not found.
     """
-    # First, try to find an exact or close match
+
+    # ✅ Step 1: Check if the market is active
+    plaza_status_query = text("""
+        SELECT estado 
+        FROM plazas_mercado 
+        WHERE nombre ILIKE :market_name 
+          AND ciudad = 'Medellín'
+        LIMIT 1
+    """)
+    plaza_status = db.execute(plaza_status_query, {"market_name": f"%{market_name}%"}).fetchone()
+
+    if not plaza_status:
+        raise HTTPException(status_code=404, detail=f"No se encontró ninguna plaza con un nombre similar a '{market_name}'.")
+    if plaza_status[0].lower() != "activa":
+        raise HTTPException(status_code=403, detail=f"La plaza '{market_name}' está actualmente inactiva.")
+
+    # ✅ Step 2: Try to find the latest price
     query = text("""
         SELECT p.precio_por_kg, p.fecha, pr.nombre AS producto, pl.nombre AS plaza
         FROM precios p
@@ -28,6 +47,7 @@ def get_latest_price(product_name: str, market_name: str, db: Session = Depends(
         WHERE pr.nombre ILIKE :product_name
           AND pl.nombre ILIKE :market_name
           AND pl.ciudad = 'Medellín'
+          AND pl.estado = 'activa'
         ORDER BY p.fecha DESC
         LIMIT 1
     """)
@@ -37,7 +57,7 @@ def get_latest_price(product_name: str, market_name: str, db: Session = Depends(
         "market_name": f"%{market_name}%"
     }).fetchone()
 
-    # If not found, suggest possible similar product names
+    # ✅ Step 3: Handle case when no result found
     if not result:
         suggestion_query = text("""
             SELECT nombre 
@@ -53,14 +73,16 @@ def get_latest_price(product_name: str, market_name: str, db: Session = Depends(
             raise HTTPException(
                 status_code=404,
                 detail={
-                    "message": "No se encontraron resultados exactos. ¿Quizás quiso decir uno de estos?",
+                    "message": f"No se encontraron resultados para '{product_name}' en '{market_name}'. "
+                               "¿Quizás quisiste decir uno de estos?",
                     "suggestions": suggested_names
                 }
             )
         else:
             raise HTTPException(
                 status_code=404,
-                detail="No se encontraron resultados para su búsqueda."
+                detail=f"No se encontraron resultados para '{product_name}' en '{market_name}', "
+                       "o la plaza no tiene datos de precios recientes."
             )
 
     return {
@@ -71,11 +93,12 @@ def get_latest_price(product_name: str, market_name: str, db: Session = Depends(
         "mensaje": "Consulta realizada exitosamente."
     }
 
+
 # --- Endpoint 2: Get all available options ---
 @router.get("/options/")
 def get_options(db: Session = Depends(get_db)):
     """
-    Return available products and markets (only Medellín) for the frontend.
+    Return available products and active markets (only Medellín) for the frontend.
     """
     productos_query = text("""
         SELECT producto_id, nombre
@@ -87,7 +110,8 @@ def get_options(db: Session = Depends(get_db)):
     plazas_query = text("""
         SELECT plaza_id, nombre, ciudad
         FROM plazas_mercado
-        WHERE ciudad ILIKE 'Medellín'
+        WHERE ciudad ILIKE 'Medellín' 
+          AND estado = 'activa'
         ORDER BY nombre ASC
     """)
     plazas = db.execute(plazas_query).fetchall()
@@ -101,8 +125,9 @@ def get_options(db: Session = Depends(get_db)):
             {"id": row.plaza_id, "nombre": row.nombre, "ciudad": row.ciudad}
             for row in plazas
         ],
-        "mensaje": "Opciones disponibles obtenidas correctamente."
+        "mensaje": "Opciones disponibles obtenidas correctamente (solo plazas activas)."
     }
+
 
 # --- Endpoint 3: List all products ---
 @router.get("/products/")
@@ -122,23 +147,25 @@ def list_products(db: Session = Depends(get_db)):
         "mensaje": "Lista de productos obtenida exitosamente."
     }
 
+
 # --- Endpoint 4: List all markets in Medellín ---
 @router.get("/markets/medellin/")
 def list_medellin_markets(db: Session = Depends(get_db)):
     """
-    List all markets in Medellín.
+    List all active markets in Medellín.
     """
     query = text("""
         SELECT plaza_id, nombre, ciudad
         FROM plazas_mercado
         WHERE ciudad = 'Medellín'
+          AND estado = 'activa'
         ORDER BY nombre ASC
     """)
     result = db.execute(query).fetchall()
 
     return {
         "plazas": [{"id": row.plaza_id, "nombre": row.nombre, "ciudad": row.ciudad} for row in result],
-        "mensaje": "Lista de plazas de Medellín obtenida exitosamente."
+        "mensaje": "Lista de plazas activas de Medellín obtenida exitosamente."
     }
 
 # --- Endpoint 5: Quick search for products ---
