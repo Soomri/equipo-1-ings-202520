@@ -61,7 +61,7 @@ def delete_marketplace(plaza_id: int, db: Session):
     if not plaza:
         raise HTTPException(status_code=404, detail="Plaza no encontrada")
 
-    related = db.query(Precio).filter(Precio.market_id == plaza_id).all()
+    related = db.query(Precio).filter(Precio.plaza_id == plaza_id).all()
     if related:
         raise HTTPException(
             status_code=400,
