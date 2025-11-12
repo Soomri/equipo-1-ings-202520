@@ -58,3 +58,12 @@ wheels/
 
 # OS
 .DS_Store
+
+# Node.js / Frontend
+client/node_modules/
+client/dist/
+client/.vite/
+
+# Crash dumps and temp files
+*.stackdump
+tatus
