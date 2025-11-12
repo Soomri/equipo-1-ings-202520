@@ -122,15 +122,15 @@ def get_price_history(
 
         product_name_normalized = product_name.replace("-", " ").replace("_", " ").strip()
 
-        #  Validate plaza status before proceeding
+        # Validate plaza status before proceeding
         check_query = text("""
-                 SELECT plz.estado
-                FROM precios AS pr
-                JOIN productos AS prod ON prod.producto_id = pr.producto_id
-                JOIN plazas_mercado AS plz ON pr.plaza_id = plz.plaza_id
-                WHERE LOWER(REPLACE(REPLACE(prod.nombre, ' ', ''), '-', '')) =
-                    LOWER(REPLACE(REPLACE(:product_name, ' ', ''), '-', ''))
-                LIMIT 1
+            SELECT plz.estado
+            FROM precios AS pr
+            JOIN productos AS prod ON prod.producto_id = pr.producto_id
+            JOIN plazas_mercado AS plz ON pr.plaza_id = plz.plaza_id
+            WHERE LOWER(REPLACE(REPLACE(prod.nombre, ' ', ''), '-', '')) =
+                LOWER(REPLACE(REPLACE(:product_name, ' ', ''), '-', ''))
+            LIMIT 1
         """)
 
         plaza_status = db.execute(check_query, {"product_name": product_name_normalized}).fetchone()
@@ -140,14 +140,15 @@ def get_price_history(
 
         start_date = datetime.utcnow() - timedelta(days=30 * months)
 
-        #  Main query (includes filter for active plazas)
+        # Main query (includes filter for active plazas)
         query = text("""
             SELECT 
                 hp.fecha_precio AS fecha,
                 hp.precio_historico AS precio_por_kg
             FROM historial_precios AS hp
-            JOIN productos AS prod ON hp.producto_id = prod.producto_id
-            JOIN plazas_mercado AS plz ON prod.plaza_id = plz.plaza_id
+            JOIN precios AS pr ON hp.precio_id = pr.precio_id
+            JOIN productos AS prod ON pr.producto_id = prod.producto_id
+            JOIN plazas_mercado AS plz ON pr.plaza_id = plz.plaza_id
             WHERE LOWER(REPLACE(REPLACE(prod.nombre, ' ', ''), '-', '')) = 
                   LOWER(REPLACE(REPLACE(:product_name, ' ', ''), '-', ''))
               AND plz.estado = 'activa'

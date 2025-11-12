@@ -1,84 +1,110 @@
-# Consulta de Información Detallada de Plaza
-Este módulo permite consultar la información detallada de las plazas de mercado registradas en el sistema.
-Incluye dos funcionalidades principales:
+# Instrucciones para probar F-22 CRUD Gestión de plazas
 
-* Visualización de todas las plazas.
-* Consulta detallada de una plaza específica por su nombre.
+Este servicio expone endpoints REST para gestionar la información de las plazas de mercado.
+Las operaciones están protegidas mediante autenticación JWT y solo los administradores pueden crear, editar o eliminar registros.
 
-### Dependencias necesarias
-* Python 3.11.9
-* FastAPI
-* SQLAlchemy
+## Requisitos previos
+1. Tener instalado Python 3.11 (recomendado).
 
-## 📋 Criterio de Aceptación 1: Visualizar información de una plaza
-Objetivo:
-Permitir al usuario acceder a la información detallada de una plaza al seleccionarla por su nombre.
+2. Tener configuradas las dependencias del proyecto:
+pip install -r requirements.txt
 
-Pasos para verificar:
-1. Iniciar el servidor:
-uvicorn main:app --reload
+3. Contar con el archivo .env en la carpeta server/ con las variables de entorno necesarias:
+* DATABASE_URL
+* SECRET_KEY
+* ALGORITHM
+* EMAIL_USER
+* ACCESS_TOKEN_EXPIRE_MINUTES
 
-2. Abrir la documentación interactiva en el navegador:
-👉 http://127.0.0.1:8000/docs
+4. Iniciar el servidor con:
+uvicorn server.main:app --reload
 
-3. Localizar el endpoint:
-GET /plazas/nombre/{nombre}
+El servicio se ejecutará en:
+http://127.0.0.1:8000
 
-4. En el campo {nombre}, escribir por ejemplo:
-Central Mayorista De Antioquia
+## Autenticación
+Antes de usar los endpoints protegidos, se debe iniciar sesión con las credenciales del administrador.
 
-5. Ejecutar la solicitud.
+Endpoint de login:
+> POST /auth/login
 
-### Resultado esperado:
-El sistema devuelve un objeto JSON con los campos:
-* nombre
-* plaza_id
-* ciudad
-* direccion
-* estado
-* numero_comerciantes
-* tipos_productos
-* horarios
-* datos_contacto
-* fecha_creacion
-* fecha_actualizacion
-* coordenadas: un objeto con formato:
-"coordenadas": {
-  "lat": 6.1868153,
-  "lon": -75.5914233
+Cuerpo de la solicitud:
+{
+"email": "plazeserviceuser@gmail.com
+",
+"password": "la_contraseña_correcta"
 }
 
-## 📋 Criterio de Aceptación 2: Mostrar ubicación en mapa
-Objetivo:
-El sistema debe proporcionar información suficiente para que el frontend muestre la ubicación de la plaza en un mapa interactivo (por ejemplo, con Google Maps).
-
-Verificación desde el backend:
-1. En la respuesta del endpoint /plazas/nombre/{nombre}, verificar que el campo coordenadas esté presente y tenga el formato:
-"coordenadas": {
-  "lat": valor_latitud,
-  "lon": valor_longitud
+Respuesta exitosa:
+{
+"access_token": "<token_jwt>",
+"token_type": "bearer"
 }
 
-2. Copiar los valores de latitud y longitud y probarlos manualmente en el navegador:
-https://www.google.com/maps?q=lat,lon
+Copia el valor de access_token y en Swagger haz clic en el botón Authorize, luego ingrésalo.
 
-3. Si la ubicación corresponde correctamente a la plaza consultada, el criterio se cumple.
+* Solo este usuario administrador podrá crear, editar o eliminar plazas.
 
-## 📋 Criterio adicional: Obtener todas las plazas
-Objetivo:
-Permitir listar todas las plazas registradas en la base de datos con sus coordenadas normalizadas.
+### Criterio de aceptación 1: Crear una plaza de mercado
+Endpoint:
+> POST /plazas/
 
-Pasos para verificar:
-1. En la misma documentación (/docs), ubicar el endpoint:
-GET /plazas/
+Requiere token de administrador.
 
-2. Ejecutar la solicitud.
+Cuerpo de ejemplo:
+{
+"nombre": "Plaza Central",
+"direccion": "Cra 10 #20-30",
+"ciudad": "Medellín",
+"coordenadas": "4.6097,-74.0817",
+"horarios": "Lunes a Domingo, 6:00 AM - 4:00 PM",
+"numero_comerciantes": 120,
+"tipos_productos": "Frutas, verduras, carnes, lácteos",
+"datos_contacto": "contacto@plazacentral.com
+"
+}
 
-Resultado esperado: 
-* Devuelve una lista JSON con todas las plazas registradas.
-* Cada elemento incluye sus datos y las coordenadas normalizadas en el mismo formato que el criterio 1.
+Respuesta esperada:
+{
+"message": "Plaza creada exitosamente",
+"plaza_id": 7
+}
 
-### Notas
-* Las coordenadas se normalizan automáticamente para uso en Google Maps (latitud positiva y longitud negativa para el hemisferio occidental).
+### Criterio de aceptación 2: Editar información de una plaza existente
+Endpoint:
+> PUT /plazas/{plaza_id}
 
-* El backend no muestra el mapa, solo provee los datos necesarios para que el frontend lo renderice.
+Requiere token de administrador.
+
+Ejemplo de solicitud:
+PUT /plazas/7
+{
+"nombre": "Plaza Central Renovada",
+"estado": "activa",
+"numero_comerciantes": 130
+}
+
+Respuesta esperada:
+{
+"message": "Plaza actualizada exitosamente",
+"plaza_id": 7
+}
+
+Solo los campos enviados serán modificados. Los demás permanecerán igual.
+
+### Criterio de aceptación 3: Eliminar una plaza de mercado
+Endpoint:
+> DELETE /plazas/{plaza_id}
+
+Requiere token de administrador.
+
+Ejemplo:
+DELETE /plazas/7
+
+Respuesta esperada:
+{
+"message": "Plaza eliminada exitosamente",
+"plaza_id": 7
+}
+
+Si la plaza tiene precios asociados en la tabla precios, estos se eliminarán automáticamente gracias a la relación en cascada.
