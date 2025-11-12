@@ -12,15 +12,30 @@ const ProductSearch = () => {
   const [showFilters, setShowFilters] = useState(false)
   const [plazas, setPlazas] = useState([])
 
-  // Fetch available plazas only when filters are shown
+  // Fetch available active plazas only when filters are shown
   useEffect(() => {
     if (showFilters && plazas.length === 0) {
       const fetchPlazas = async () => {
         try {
-          const options = await productService.getOptions()
-          setPlazas(options.plazas || [])
+          // Use the specific endpoint that returns only active plazas
+          const response = await productService.getActivePlazas()
+          // Map the response to match the expected format
+          const activePlazas = response.plazas.map(plaza => ({
+            id: plaza.plaza_id,
+            nombre: plaza.nombre,
+            ciudad: plaza.ciudad
+          }))
+          setPlazas(activePlazas)
+          console.log(`✅ Loaded ${activePlazas.length} active plazas`)
         } catch (error) {
-          console.error('Error loading plazas:', error)
+          console.error('Error loading active plazas:', error)
+          // Fallback to the old endpoint if the new one fails
+          try {
+            const options = await productService.getOptions()
+            setPlazas(options.plazas || [])
+          } catch (fallbackError) {
+            console.error('Error in fallback:', fallbackError)
+          }
         }
       }
       fetchPlazas()
