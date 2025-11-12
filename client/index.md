@@ -50,7 +50,7 @@ It identifies the most critical UI flows that must be validated after each deplo
 - No backend call is made
 - Button remains enabled for retry
 
-**Reference Image**: See Image 1
+**Reference Image**: ![login-incomplete-email](images/testing/login-incomplete-email.png)
 
 ---
 
@@ -59,16 +59,17 @@ It identifies the most critical UI flows that must be validated after each deplo
 **Precondition**: User is on the login screen
 
 **Steps**:
-1. Enter email with non-existent domain: `arigato@asdwdqwqeq.com`
+1. Enter email with non-existent domain: `arigato@gmail.co`
 2. Enter a valid password
 3. Click "Iniciar Sesión" button
 
 **Expected Result**:
-- ❌ Error message displays: "Error de conexión. Verifica tu conexión a internet."
-- Form remains editable
-- User can correct the email and try again
+- ❌ Error message displays: "Correo o contraseña incorrectos"
+- Email field border shows in red
+- No backend call is made
+- Button remains enabled for retry
 
-**Reference Image**: See Image 2
+**Reference Image**: ![login-invalid-email](images/testing/login-invalid-email.png)
 
 ---
 
@@ -87,7 +88,7 @@ It identifies the most critical UI flows that must be validated after each deplo
 - Fields maintain their values to facilitate correction
 - "Recuperar contraseña" link remains visible
 
-**Reference Images**: See Images 3, 4, 5, 7
+**Reference Images**: ![login-incorrect-credentials](images/testing/login-incorrect-credentials.png)
 
 ---
 
@@ -106,7 +107,7 @@ It identifies the most critical UI flows that must be validated after each deplo
 - No backend call is made
 - Focus is placed on the first empty field
 
-**Reference Image**: See Image 6
+**Reference Images**: ![login-empty-fields-validation-1](images/testing/login-empty-fields-validation-1.png) ![login-empty-fields-validation-2](images/testing/login-empty-fields-validation-2.png)
 
 ---
 
@@ -127,6 +128,8 @@ It identifies the most critical UI flows that must be validated after each deplo
 - Redirect to main application screen
 - No error messages are displayed
 - Session remains active according to token expiration time
+
+**Reference Images**: ![login-successful-login](images/testing/login-successful-login.png)
 
 ---
 
