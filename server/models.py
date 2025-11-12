@@ -139,21 +139,6 @@ class PlazaMercado(Base):
     # Inverse relationship to Price model
     precios = relationship("Precio", back_populates="plaza", cascade="all, delete-orphan")
 
-# =============================
-# Pydantic Model (for request)
-# =============================
-
-class PlazaCreate(BaseModel):
-    nombre: str
-    direccion: str
-    ciudad: str
-    coordenadas: str
-    horarios: str
-    numero_comerciantes: Optional[int] = None
-    tipos_productos: Optional[str] = None
-    datos_contacto: Optional[str] = None
-
-
 class Producto(Base):
     """
     ORM model for products catalog.
