@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, MapPin, CheckCircle } from 'lucide-react'
-import { authService } from '../config/api'
+import { authService, plazaService } from '../config/api'
 
 const AdminPlazasCreatePage = () => {
   const navigate = useNavigate()
@@ -16,13 +16,13 @@ const AdminPlazasCreatePage = () => {
   const [formData, setFormData] = useState({
     nombre: '',
     direccion: '',
-    ciudad: '',
+    ciudad: 'Medellín',
     latitud: '',
     longitud: '',
-    estado: 'activa',
+    horarios: '',
     numero_comerciantes: '',
-    tipos_producto: '',
-    numero_contacto: ''
+    tipos_productos: '',
+    datos_contacto: ''
   })
 
   // Redirect if not admin
@@ -57,7 +57,7 @@ const AdminPlazasCreatePage = () => {
     try {
       // Validate required fields
       if (!formData.nombre.trim() || !formData.direccion.trim() || !formData.ciudad.trim() || 
-          !formData.latitud || !formData.longitud || !formData.estado) {
+          !formData.latitud || !formData.longitud) {
         setErrorMessage('Por favor completa todos los campos obligatorios')
         setIsLoading(false)
         return
@@ -79,20 +79,20 @@ const AdminPlazasCreatePage = () => {
         return
       }
 
-      // Simulate API call (will be replaced with actual API call later)
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      console.log('Plaza data to submit:', {
+      // Prepare data for API (backend expects coordinates in format "(lat, lng)")
+      const plazaData = {
         nombre: formData.nombre.trim(),
         direccion: formData.direccion.trim(),
         ciudad: formData.ciudad.trim(),
-        latitud: lat,
-        longitud: lng,
-        estado: formData.estado,
-        numero_comerciantes: formData.numero_comerciantes ? parseInt(formData.numero_comerciantes) : null,
-        tipos_producto: formData.tipos_producto.trim() || null,
-        numero_contacto: formData.numero_contacto.trim() || null
-      })
+        coordenadas: `(${lat}, ${lng})`,
+        horarios: formData.horarios.trim() || undefined,
+        numero_comerciantes: formData.numero_comerciantes ? parseInt(formData.numero_comerciantes) : 0,
+        tipos_productos: formData.tipos_productos.trim() || undefined,
+        datos_contacto: formData.datos_contacto.trim() || undefined
+      }
+
+      // Call API
+      const response = await plazaService.createPlaza(plazaData)
       
       setSuccessMessage(`Plaza "${formData.nombre}" creada exitosamente`)
       
@@ -100,23 +100,23 @@ const AdminPlazasCreatePage = () => {
       setFormData({
         nombre: '',
         direccion: '',
-        ciudad: '',
+        ciudad: 'Medellín',
         latitud: '',
         longitud: '',
-        estado: 'activa',
+        horarios: '',
         numero_comerciantes: '',
-        tipos_producto: '',
-        numero_contacto: ''
+        tipos_productos: '',
+        datos_contacto: ''
       })
 
       // Redirect after 2 seconds
       setTimeout(() => {
-        navigate('/admin/plazas')
+        navigate('/admin/plazas/list')
       }, 2000)
       
     } catch (error) {
       console.error('Error creating plaza:', error)
-      setErrorMessage('Error al crear la plaza. Intenta nuevamente.')
+      setErrorMessage(error.message || 'Error al crear la plaza. Intenta nuevamente.')
     } finally {
       setIsLoading(false)
     }
@@ -226,7 +226,7 @@ const AdminPlazasCreatePage = () => {
               fontSize: '14px',
               color: '#1565C0'
             }}>
-              <strong>Campos obligatorios:</strong> Nombre, Dirección, Ciudad, Coordenadas y Estado
+              <strong>Campos obligatorios:</strong> Nombre, Dirección, Ciudad (Medellín) y Coordenadas
             </div>
 
             {/* Form Fields - Required */}
@@ -301,20 +301,23 @@ const AdminPlazasCreatePage = () => {
               <input
                 type="text"
                 name="ciudad"
-                placeholder="Ej: Medellín"
-                value={formData.ciudad}
-                onChange={handleInputChange}
+                value="Medellín"
+                disabled
                 style={{
                   width: '100%',
                   height: '60px',
-                  backgroundColor: 'rgba(217, 217, 217, 0.5)',
-                  border: '1px solid #000000',
+                  backgroundColor: 'rgba(217, 217, 217, 0.3)',
+                  border: '1px solid #999',
                   borderRadius: '4px',
                   padding: '0 15px',
                   fontSize: '18px',
-                  color: '#1a1a1a'
+                  color: '#666',
+                  cursor: 'not-allowed'
                 }}
               />
+              <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                * La ciudad es fija para este sistema
+              </p>
             </div>
 
             {/* Coordinates Row */}
@@ -380,37 +383,6 @@ const AdminPlazasCreatePage = () => {
               </div>
             </div>
 
-            <div className="input-wrapper" style={{ width: '100%', marginBottom: '30px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '16px',
-                fontWeight: '500',
-                marginBottom: '8px',
-                color: '#333'
-              }}>
-                Estado <span style={{ color: '#D32F2F' }}>*</span>
-              </label>
-              <select
-                name="estado"
-                value={formData.estado}
-                onChange={handleInputChange}
-                style={{
-                  width: '100%',
-                  height: '60px',
-                  backgroundColor: 'rgba(217, 217, 217, 0.5)',
-                  border: '1px solid #000000',
-                  borderRadius: '4px',
-                  padding: '0 15px',
-                  fontSize: '18px',
-                  color: '#1a1a1a',
-                  cursor: 'pointer'
-                }}
-              >
-                <option value="activa">Activa</option>
-                <option value="inactiva">Inactiva</option>
-              </select>
-            </div>
-
             {/* Optional Fields Label */}
             <div style={{
               backgroundColor: '#FFF3E0',
@@ -425,6 +397,38 @@ const AdminPlazasCreatePage = () => {
             </div>
 
             {/* Form Fields - Optional */}
+            <div className="input-wrapper" style={{ width: '100%', marginBottom: '25px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '16px',
+                fontWeight: '500',
+                marginBottom: '8px',
+                color: '#333'
+              }}>
+                Horarios
+              </label>
+              <input
+                type="text"
+                name="horarios"
+                placeholder="Ej: Lun-Dom 6:00-18:00"
+                value={formData.horarios}
+                onChange={handleInputChange}
+                style={{
+                  width: '100%',
+                  height: '60px',
+                  backgroundColor: 'rgba(217, 217, 217, 0.5)',
+                  border: '1px solid #000000',
+                  borderRadius: '4px',
+                  padding: '0 15px',
+                  fontSize: '18px',
+                  color: '#1a1a1a'
+                }}
+              />
+              <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                Formato: Lun-Dom 6:00-18:00
+              </p>
+            </div>
+
             <div className="input-wrapper" style={{ width: '100%', marginBottom: '25px' }}>
               <label style={{
                 display: 'block',
@@ -462,13 +466,13 @@ const AdminPlazasCreatePage = () => {
                 marginBottom: '8px',
                 color: '#333'
               }}>
-                Tipos de Producto que Vende
+                Tipos de Productos
               </label>
               <input
                 type="text"
-                name="tipos_producto"
+                name="tipos_productos"
                 placeholder="Ej: Frutas, Verduras, Carnes, Lácteos"
-                value={formData.tipos_producto}
+                value={formData.tipos_productos}
                 onChange={handleInputChange}
                 style={{
                   width: '100%',
@@ -491,13 +495,13 @@ const AdminPlazasCreatePage = () => {
                 marginBottom: '8px',
                 color: '#333'
               }}>
-                Número de Contacto
+                Datos de Contacto
               </label>
               <input
                 type="text"
-                name="numero_contacto"
-                placeholder="Ej: 3001234567"
-                value={formData.numero_contacto}
+                name="datos_contacto"
+                placeholder="Ej: 3001234567 o correo@ejemplo.com"
+                value={formData.datos_contacto}
                 onChange={handleInputChange}
                 style={{
                   width: '100%',
@@ -510,6 +514,9 @@ const AdminPlazasCreatePage = () => {
                   color: '#1a1a1a'
                 }}
               />
+              <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                Puede ser un teléfono o correo electrónico
+              </p>
             </div>
 
             {/* Error Message */}

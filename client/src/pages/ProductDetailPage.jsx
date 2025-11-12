@@ -187,7 +187,7 @@ const ProductDetailPage = () => {
   }, [predictionExpanded, productName, predictionMonths, predictionData])
 
   const handleBack = () => {
-    navigate('/home')
+    navigate('/products')
   }
 
   const handleMonthsChange = (newMonths) => {
@@ -425,9 +425,10 @@ const ProductDetailPage = () => {
               {productName}
                 </h1>
 
-            {/* Plaza Filter Badge */}
+            {/* Plaza Filter Badge - Clickeable */}
               {selectedPlaza && (
-                <div 
+                <button
+                  onClick={() => navigate(`/plaza/${encodeURIComponent(selectedPlaza)}`)}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -439,12 +440,23 @@ const ProductDetailPage = () => {
                   fontSize: '0.9375rem',
                   color: '#2E7D32',
                   fontWeight: '600',
-                  border: '2px solid #4CA772'
+                  border: '2px solid #4CA772',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
                 }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#D2EDCC'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#E8F5E9'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
+                  title="Ver información de la plaza"
               >
                 <Store className="w-5 h-5" />
                 <span>Filtrando por: <strong>{selectedPlaza}</strong></span>
-              </div>
+              </button>
             )}
 
             {/* Current Price Display */}
@@ -495,15 +507,33 @@ const ProductDetailPage = () => {
                 )}
               </div>
 
-              {/* Plaza Info */}
+              {/* Plaza Info - Clickeable */}
               {currentPrice && currentPrice.plaza && (
-                <div 
+                <button 
+                  onClick={() => navigate(`/plaza/${encodeURIComponent(currentPrice.plaza)}`)}
                   style={{
                     backgroundColor: '#F5F5F5',
                     padding: '1.5rem',
                     borderRadius: '12px',
-                    border: '2px solid #E0E0E0'
+                    border: '2px solid #E0E0E0',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    width: '100%',
+                    textAlign: 'left'
                   }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#E8F5E9'
+                    e.currentTarget.style.borderColor = '#4CA772'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(76, 167, 114, 0.2)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#F5F5F5'
+                    e.currentTarget.style.borderColor = '#E0E0E0'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = 'none'
+                  }}
+                  title="Ver información completa de la plaza"
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                     <Store className="w-6 h-6" style={{ color: '#4CA772' }} />
@@ -514,7 +544,10 @@ const ProductDetailPage = () => {
                   <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#333', margin: 0 }}>
                     {currentPrice.plaza}
                   </p>
-                </div>
+                  <p style={{ fontSize: '0.75rem', color: '#4CA772', marginTop: '0.5rem', marginBottom: 0, fontWeight: '500' }}>
+                    Click para ver detalles →
+                  </p>
+                </button>
               )}
             </div>
           </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Search, Loader2, ShoppingBasket, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Search, Loader2, ShoppingBasket, TrendingUp, Filter, X, Store } from 'lucide-react'
 import { productService } from '../config/api'
 
 /**
@@ -13,7 +13,11 @@ const ProductsListPage = () => {
   const [products, setProducts] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filteredProducts, setFilteredProducts] = useState([])
+  const [selectedPlaza, setSelectedPlaza] = useState('')
+  const [plazas, setPlazas] = useState([])
+  const [showFilters, setShowFilters] = useState(false)
 
+  // Fetch products on mount
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -32,6 +36,28 @@ const ProductsListPage = () => {
     fetchProducts()
   }, [])
 
+  // Fetch plazas when filter is shown
+  useEffect(() => {
+    const fetchPlazas = async () => {
+      if (showFilters && plazas.length === 0) {
+        try {
+          const response = await productService.getActivePlazas()
+          const activePlazas = response.plazas.map(plaza => ({
+            id: plaza.plaza_id,
+            nombre: plaza.nombre,
+            ciudad: plaza.ciudad
+          }))
+          setPlazas(activePlazas)
+          console.log(`✅ Loaded ${activePlazas.length} active plazas`)
+        } catch (error) {
+          console.error('Error loading active plazas:', error)
+        }
+      }
+    }
+
+    fetchPlazas()
+  }, [showFilters, plazas.length])
+
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredProducts(products)
@@ -44,11 +70,24 @@ const ProductsListPage = () => {
   }, [searchQuery, products])
 
   const handleProductClick = (productName) => {
-    navigate(`/product/${encodeURIComponent(productName)}`)
+    // If plaza is selected, pass it as query parameter
+    if (selectedPlaza) {
+      navigate(`/product/${encodeURIComponent(productName)}?plaza=${encodeURIComponent(selectedPlaza)}`)
+    } else {
+      navigate(`/product/${encodeURIComponent(productName)}`)
+    }
   }
 
   const handleBack = () => {
-    navigate(-1)
+    navigate('/home')
+  }
+
+  const toggleFilters = () => {
+    setShowFilters(!showFilters)
+  }
+
+  const clearFilters = () => {
+    setSelectedPlaza('')
   }
 
   if (loading) {
@@ -65,6 +104,16 @@ const ProductsListPage = () => {
   return (
     <>
       <style>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
         .product-card {
           transition: all 0.3s ease;
           cursor: pointer;
@@ -127,9 +176,10 @@ const ProductsListPage = () => {
             </div>
           </div>
 
-          {/* Search Bar */}
+          {/* Search Bar and Filters */}
           <div style={{ marginBottom: '2rem' }}>
-            <div style={{ position: 'relative', maxWidth: '600px' }}>
+            {/* Search Bar */}
+            <div style={{ position: 'relative', maxWidth: '600px', marginBottom: '1rem' }}>
               <Search 
                 className="w-5 h-5" 
                 style={{ 
@@ -156,6 +206,182 @@ const ProductsListPage = () => {
                 }}
               />
             </div>
+
+            {/* Filter Button */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <button 
+                type="button"
+                onClick={toggleFilters}
+                style={{ 
+                  padding: '0.625rem 1.25rem',
+                  borderRadius: '8px',
+                  border: selectedPlaza ? '2px solid #4CA772' : (showFilters ? '1px solid #4CA772' : '1px solid #ddd'),
+                  backgroundColor: selectedPlaza ? '#4CA772' : (showFilters ? '#E8F5E9' : 'transparent'),
+                  color: selectedPlaza ? '#FFFFFF' : (showFilters ? '#2E7D32' : '#666'),
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.2s',
+                  boxShadow: selectedPlaza ? '0 2px 8px rgba(76, 167, 114, 0.3)' : 'none'
+                }}
+              >
+                {showFilters ? (
+                  <>
+                    <X className="w-4 h-4" />
+                    Ocultar filtros
+                  </>
+                ) : (
+                  <>
+                    <Filter className="w-4 h-4" />
+                    Filtrar por plazas
+                    {selectedPlaza && (
+                      <span style={{
+                        backgroundColor: '#FFFFFF',
+                        color: '#4CA772',
+                        borderRadius: '50%',
+                        width: '20px',
+                        height: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        marginLeft: '4px'
+                      }}>
+                        1
+                      </span>
+                    )}
+                  </>
+                )}
+              </button>
+              
+              {/* Active Filter Badge */}
+              {selectedPlaza && !showFilters && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '6px 12px',
+                  backgroundColor: '#E8F5E9',
+                  border: '1px solid #4CA772',
+                  borderRadius: '20px',
+                  fontSize: '13px',
+                  color: '#2E7D32',
+                  fontWeight: '500'
+                }}>
+                  <Store className="w-4 h-4" />
+                  <span>{selectedPlaza}</span>
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '0',
+                      marginLeft: '4px'
+                    }}
+                    title="Quitar filtro"
+                  >
+                    <X className="w-4 h-4" style={{ color: '#F57C00' }} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Filter Panel */}
+            {showFilters && (
+              <div 
+                style={{
+                  backgroundColor: '#f9f9f9',
+                  borderRadius: '12px',
+                  padding: '1.5rem',
+                  marginTop: '1rem',
+                  border: '1px solid #e0e0e0',
+                  boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
+                  animation: 'slideDown 0.3s ease-out'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Store className="w-5 h-5" style={{ color: '#4CA772' }} />
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#333', margin: 0 }}>
+                      Filtrar por plaza de mercado
+                    </h3>
+                  </div>
+                  {selectedPlaza && (
+                    <button
+                      type="button"
+                      onClick={clearFilters}
+                      style={{
+                        fontSize: '0.875rem',
+                        color: '#F57C00',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontWeight: '500',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <X className="w-4 h-4" />
+                      Limpiar filtro
+                    </button>
+                  )}
+                </div>
+
+                <select
+                  value={selectedPlaza}
+                  onChange={(e) => setSelectedPlaza(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    border: '2px solid #ddd',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    backgroundColor: 'white',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    transition: 'border-color 0.2s',
+                    color: '#333'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#4CA772'}
+                  onBlur={(e) => e.target.style.borderColor = '#ddd'}
+                >
+                  <option value="">🏪 Todas las plazas de mercado</option>
+                  {plazas.map((plaza) => (
+                    <option key={plaza.id} value={plaza.nombre}>
+                      {plaza.nombre} - {plaza.ciudad}
+                    </option>
+                  ))}
+                </select>
+
+                {selectedPlaza && (
+                  <div 
+                    style={{
+                      padding: '0.75rem',
+                      backgroundColor: '#E8F5E9',
+                      borderRadius: '8px',
+                      fontSize: '0.875rem',
+                      color: '#2E7D32',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      marginTop: '1rem'
+                    }}
+                  >
+                    <Store className="w-4 h-4" />
+                    <span>Filtrando por: <strong>{selectedPlaza}</strong></span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Products Grid */}

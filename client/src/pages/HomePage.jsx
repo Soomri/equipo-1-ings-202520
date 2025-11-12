@@ -1,7 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Settings } from 'lucide-react'
-import ProductSearch from '../components/ProductSearch'
+import { Settings, Search, ArrowRight, Store } from 'lucide-react'
 import { authService } from '../config/api'
 
 const HomePage = () => {
@@ -16,6 +15,14 @@ const HomePage = () => {
   return (
     <>
       <style>{`
+        @keyframes pulse {
+          0%, 100% {
+            box-shadow: 0 8px 24px rgba(76, 167, 114, 0.4);
+          }
+          50% {
+            box-shadow: 0 8px 32px rgba(76, 167, 114, 0.6);
+          }
+        }
         @media (max-width: 1450px) {
           .home-hero-card {
             width: 95% !important;
@@ -63,6 +70,10 @@ const HomePage = () => {
           .home-cta-text {
             font-size: 1.375rem !important;
           }
+          .cta-button {
+            padding: 20px 40px !important;
+            fontSize: 24px !important;
+          }
         }
         @media (max-width: 768px) {
           .home-title {
@@ -79,6 +90,10 @@ const HomePage = () => {
           }
           .home-cta-text {
             font-size: 1.125rem !important;
+          }
+          .cta-button {
+            padding: 16px 32px !important;
+            fontSize: 20px !important;
           }
         }
         @media (max-width: 480px) {
@@ -101,6 +116,15 @@ const HomePage = () => {
           }
           .home-cta-text {
             font-size: 1rem !important;
+          }
+          .cta-button {
+            padding: 14px 28px !important;
+            fontSize: 18px !important;
+            gap: 8px !important;
+          }
+          .cta-button svg {
+            width: 20px !important;
+            height: 20px !important;
           }
         }
       `}</style>
@@ -175,33 +199,109 @@ const HomePage = () => {
               </div>
             </div>
 
-            {/* Call to Action before Search */}
+            {/* Call to Action */}
             <div style={{
               textAlign: 'center',
-              marginBottom: '30px',
-              marginTop: '20px'
+              marginBottom: '40px',
+              marginTop: '40px'
             }}>
               <h3 className="home-cta-text" style={{
-                fontSize: '28px',
-                fontWeight: '600',
+                fontSize: '32px',
+                fontWeight: '700',
                 color: '#2E7D32',
-                marginBottom: '12px',
+                marginBottom: '16px',
                 textShadow: '1px 1px 2px rgba(0, 0, 0, 0.1)'
               }}>
-                ¿Qué producto estás buscando hoy?
+                ¿Listo para encontrar los mejores precios?
               </h3>
               <p className="home-hero-text" style={{
-                fontSize: '18px',
+                fontSize: '20px',
                 color: '#555',
-                fontWeight: '400'
+                fontWeight: '400',
+                marginBottom: '32px'
               }}>
-                Ingresa el nombre del producto para consultar precios en tiempo real
+                Explora nuestro catálogo completo de productos
               </p>
-            </div>
 
-            {/* Search Component */}
-            <div className="w-full flex justify-center">
-              <ProductSearch />
+              {/* Big Call to Action Button */}
+              <button
+                onClick={() => navigate('/products')}
+                className="cta-button"
+                style={{
+                  backgroundColor: '#4CA772',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '20px',
+                  padding: '24px 60px',
+                  fontSize: '28px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  boxShadow: '0 8px 24px rgba(76, 167, 114, 0.4)',
+                  transition: 'all 0.3s ease',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  letterSpacing: '0.5px',
+                  animation: 'pulse 2s infinite'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#3D8F5F'
+                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.05)'
+                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(76, 167, 114, 0.5)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#4CA772'
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)'
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(76, 167, 114, 0.4)'
+                }}
+              >
+                <Search className="w-8 h-8" />
+                Empieza a Buscar Productos
+                <ArrowRight className="w-8 h-8" />
+              </button>
+
+              {/* Additional subtle text */}
+              <p style={{
+                fontSize: '16px',
+                color: '#888',
+                marginTop: '20px',
+                fontStyle: 'italic'
+              }}>
+                Accede a precios actualizados y compara entre plazas
+              </p>
+
+              {/* Secondary Button - Ver Plazas */}
+              <button
+                onClick={() => navigate('/plazas')}
+                style={{
+                  marginTop: '16px',
+                  backgroundColor: 'transparent',
+                  color: '#4CA772',
+                  border: '2px solid #4CA772',
+                  borderRadius: '12px',
+                  padding: '12px 32px',
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#4CA772'
+                  e.currentTarget.style.color = 'white'
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.color = '#4CA772'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
+              >
+                <Store className="w-6 h-6" />
+                Ver Plazas Disponibles
+              </button>
             </div>
 
             {/* Admin Button - Only visible for administrators */}

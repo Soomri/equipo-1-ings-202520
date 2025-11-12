@@ -175,35 +175,66 @@ export const productService = {
 }
 
 export const plazaService = {
-  // Get market plazas (F-23)
-  getPlazas: async (city = 'Medellín') => {
+  // Get all plazas
+  getAllPlazas: async () => {
     try {
-      const response = await api.get('/plazas', {
-        params: { city }
-      })
+      const response = await api.get('/plazas/')
       return response.data
     } catch (error) {
       throw new Error(`Error getting plazas: ${error.message}`)
     }
   },
 
-  // Get detailed plaza information (F-23)
-  getPlazaDetails: async (plazaId) => {
+  // Get plaza by name
+  getPlazaByName: async (plazaName) => {
     try {
-      const response = await api.get(`/plazas/${plazaId}`)
+      const response = await api.get(`/plazas/nombre/${encodeURIComponent(plazaName)}`)
       return response.data
     } catch (error) {
       throw new Error(`Error getting plaza details: ${error.message}`)
     }
   },
 
-  // Get all markets in Medellín
-  getMedellinMarkets: async () => {
+  // Get active plazas only (for filtering)
+  getActivePlazas: async () => {
     try {
-      const response = await api.get('/prices/markets/medellin/')
+      const response = await api.get('/product-prices/plazas')
       return response.data
     } catch (error) {
-      throw new Error(`Error getting Medellín markets: ${error.message}`)
+      throw new Error(`Error getting active plazas: ${error.message}`)
+    }
+  },
+
+  // Admin: Create plaza
+  createPlaza: async (plazaData) => {
+    try {
+      const response = await api.post('/plazas/', plazaData)
+      return response.data
+    } catch (error) {
+      const message = error.response?.data?.detail || error.message || 'Error al crear plaza'
+      throw new Error(message)
+    }
+  },
+
+  // Admin: Update plaza
+  updatePlaza: async (plazaId, plazaData) => {
+    try {
+      const response = await api.put(`/plazas/${plazaId}`, plazaData)
+      return response.data
+    } catch (error) {
+      const message = error.response?.data?.detail || error.message || 'Error al actualizar plaza'
+      throw new Error(message)
+    }
+  },
+
+  // Admin: Delete plaza
+  deletePlaza: async (plazaId) => {
+    try {
+      const response = await api.delete(`/plazas/${plazaId}`)
+      return response.data
+    } catch (error) {
+      const message = error.response?.data?.detail || error.message || 'Error al eliminar plaza'
+      throw new Error(message)
     }
   }
 }

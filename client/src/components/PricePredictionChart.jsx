@@ -1,30 +1,39 @@
-import React from 'react'
-import { TrendingUp, Calendar, DollarSign } from 'lucide-react'
+import React, { useState } from 'react'
+import { TrendingUp, Calendar, DollarSign, ExternalLink, X } from 'lucide-react'
 
 /**
  * PricePredictionChart Component
  * Displays price predictions with visual graph
  */
 const PricePredictionChart = ({ predictions, productName, monthsAhead }) => {
-  if (!predictions || !predictions.predictions) {
+  const [showGraph, setShowGraph] = useState(false)
+
+  // Validate predictions data
+  if (!predictions || !predictions.predictions || predictions.predictions.length === 0) {
     return null
   }
 
   const predData = predictions.predictions
 
-  // Find min and max for scaling
-  const allPrices = [
-    ...(predData.historical || []).map(p => p.price),
-    ...(predData.forecast || []).map(p => p.yhat)
-  ]
-  const minPrice = Math.min(...allPrices)
-  const maxPrice = Math.max(...allPrices)
-  const priceRange = maxPrice - minPrice
-
-  // Calculate positions for visualization
-  const getYPosition = (price) => {
-    return 100 - ((price - minPrice) / priceRange) * 100
+  // Parse prices from backend format (removes "$" and converts "10.000,00" to number)
+  const parsePrice = (priceStr) => {
+    if (typeof priceStr === 'number') return priceStr
+    return parseFloat(
+      priceStr
+        .replace('$', '')
+        .replace(/\./g, '') // Remove thousands separator
+        .replace(',', '.') // Convert decimal separator
+    )
   }
+
+  // Extract statistics from predictions array
+  const prices = predData.map(p => parsePrice(p['Precio estimado (por Kg)']))
+  const avgForecast = prices.reduce((a, b) => a + b, 0) / prices.length
+  const maxForecast = Math.max(...prices)
+  const minForecast = Math.min(...prices)
+
+  // Graph URL from backend response
+  const graphUrl = predictions.graph_url
 
   return (
     <>
@@ -60,7 +69,7 @@ const PricePredictionChart = ({ predictions, productName, monthsAhead }) => {
               </span>
             </div>
             <p style={{ fontSize: '1.75rem', fontWeight: '700', color: '#1B5E20', margin: 0 }}>
-              ${predData.avg_forecast?.toLocaleString('es-CO') || 'N/A'}/kg
+              ${Math.round(avgForecast).toLocaleString('es-CO')}/kg
             </p>
           </div>
 
@@ -78,7 +87,7 @@ const PricePredictionChart = ({ predictions, productName, monthsAhead }) => {
               </span>
             </div>
             <p style={{ fontSize: '1.75rem', fontWeight: '700', color: '#E65100', margin: 0 }}>
-              ${predData.max_forecast?.toLocaleString('es-CO') || 'N/A'}/kg
+              ${Math.round(maxForecast).toLocaleString('es-CO')}/kg
             </p>
           </div>
 
@@ -96,10 +105,127 @@ const PricePredictionChart = ({ predictions, productName, monthsAhead }) => {
               </span>
             </div>
             <p style={{ fontSize: '1.75rem', fontWeight: '700', color: '#0D47A1', margin: 0 }}>
-              ${predData.min_forecast?.toLocaleString('es-CO') || 'N/A'}/kg
+              ${Math.round(minForecast).toLocaleString('es-CO')}/kg
             </p>
           </div>
         </div>
+
+        {/* View Graph Button */}
+        {graphUrl && (
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <button
+              onClick={() => setShowGraph(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                padding: '1rem 2rem',
+                backgroundColor: '#4CA772',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 12px rgba(76, 167, 114, 0.3)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(76, 167, 114, 0.4)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(76, 167, 114, 0.3)'
+              }}
+            >
+              <ExternalLink className="w-5 h-5" />
+              Ver Gráfico Interactivo de Predicción
+            </button>
+          </div>
+        )}
+
+        {/* Graph Modal */}
+        {showGraph && graphUrl && (
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 9999,
+              padding: '1rem'
+            }}
+            onClick={() => setShowGraph(false)}
+          >
+            <div 
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '16px',
+                width: '90%',
+                maxWidth: '1200px',
+                height: '85vh',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div 
+                style={{
+                  padding: '1.5rem',
+                  borderBottom: '2px solid #E0E0E0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  backgroundColor: '#F9F9F9'
+                }}
+              >
+                <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700', color: '#333' }}>
+                  📈 Gráfico de Predicción - {productName}
+                </h3>
+                <button
+                  onClick={() => setShowGraph(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '0.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '50%',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F0F0F0'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <X className="w-6 h-6" style={{ color: '#666' }} />
+                </button>
+              </div>
+
+              {/* Modal Content - iframe */}
+              <div style={{ flex: 1, overflow: 'hidden' }}>
+                <iframe
+                  src={graphUrl}
+                  title="Prediction Graph"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none'
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Prediction Table */}
         <div style={{
@@ -161,7 +287,7 @@ const PricePredictionChart = ({ predictions, productName, monthsAhead }) => {
                 </tr>
               </thead>
               <tbody>
-                {predData.forecast && predData.forecast.map((pred, index) => (
+                {predData.map((pred, index) => (
                   <tr 
                     key={index}
                     style={{ 
@@ -172,7 +298,7 @@ const PricePredictionChart = ({ predictions, productName, monthsAhead }) => {
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <td style={{ padding: '0.75rem', fontSize: '0.875rem', color: '#333' }}>
-                      {new Date(pred.ds).toLocaleDateString('es-CO', { 
+                      {new Date(pred.Fecha).toLocaleDateString('es-CO', { 
                         year: 'numeric', 
                         month: 'long',
                         day: 'numeric'
@@ -185,7 +311,7 @@ const PricePredictionChart = ({ predictions, productName, monthsAhead }) => {
                       fontWeight: '700',
                       color: '#4CA772'
                     }}>
-                      ${Math.round(pred.yhat).toLocaleString('es-CO')}
+                      ${Math.round(parsePrice(pred['Precio estimado (por Kg)'])).toLocaleString('es-CO')}
                     </td>
                     <td style={{ 
                       padding: '0.75rem', 
@@ -193,7 +319,7 @@ const PricePredictionChart = ({ predictions, productName, monthsAhead }) => {
                       fontSize: '0.875rem',
                       color: '#666'
                     }}>
-                      ${Math.round(pred.yhat_lower).toLocaleString('es-CO')}
+                      ${Math.round(parsePrice(pred['Mínimo estimado'])).toLocaleString('es-CO')}
                     </td>
                     <td style={{ 
                       padding: '0.75rem', 
@@ -201,7 +327,7 @@ const PricePredictionChart = ({ predictions, productName, monthsAhead }) => {
                       fontSize: '0.875rem',
                       color: '#666'
                     }}>
-                      ${Math.round(pred.yhat_upper).toLocaleString('es-CO')}
+                      ${Math.round(parsePrice(pred['Máximo estimado'])).toLocaleString('es-CO')}
                     </td>
                   </tr>
                 ))}
