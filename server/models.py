@@ -9,7 +9,7 @@ Note:
     Column names in Spanish are maintained to match the existing database schema.
 """
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Date, DECIMAL, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Date, DECIMAL, ForeignKey, Text, TIMESTAMP
 from sqlalchemy.orm import relationship
 from database import Base
 from datetime import datetime
@@ -146,7 +146,11 @@ class PlazaMercado(Base):
     direccion = Column(String, nullable=True)
     ciudad = Column(String, nullable=False)
     coordenadas = Column(String, nullable=True)
-    estado = Column(String, default="activa") 
+    estado = Column(String, default="activa")
+    horarios = Column(String, nullable=True)
+    numero_comerciantes = Column(Integer, nullable=True)
+    tipos_productos = Column(Text, nullable=True)
+    datos_contacto = Column(String, nullable=True)
     fecha_creacion = Column(DateTime, default=datetime.utcnow)
     fecha_actualizacion = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -209,11 +213,11 @@ class Predicciones(Base):
     fecha_creacion = Column(DateTime, default=datetime.utcnow)
     fecha_actualizacion = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # 🔗 Relationships
+    # Relationships
     producto = relationship("Producto", backref="predicciones")
     plaza = relationship("PlazaMercado", backref="predicciones")
 
-    # 🧩 Constraints and indexes
+    # Constraints and indexes
     __table_args__ = (
         # Unique combination of product, plaza, and date
         # to prevent duplicate predictions for the same period
@@ -227,4 +231,3 @@ class Predicciones(Base):
         ),
         __import__('sqlalchemy').Index("idx_prediccion_fecha", "fecha_prediccion"),
     )
-

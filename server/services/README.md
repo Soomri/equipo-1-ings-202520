@@ -1,73 +1,84 @@
-# 🧠 Price Prediction Service with Prophet
+# Consulta de Información Detallada de Plaza
+Este módulo permite consultar la información detallada de las plazas de mercado registradas en el sistema.
+Incluye dos funcionalidades principales:
 
-This module implements a **price prediction service** using **Facebook Prophet**, with database persistence and interactive visualization through **Plotly**.  
+* Visualización de todas las plazas.
+* Consulta detallada de una plaza específica por su nombre.
 
-The service can be executed directly or accessed via the integrated **`/predictions/`** FastAPI endpoint.
+### Dependencias necesarias
+* Python 3.11.9
+* FastAPI
+* SQLAlchemy
 
----
+## 📋 Criterio de Aceptación 1: Visualizar información de una plaza
+Objetivo:
+Permitir al usuario acceder a la información detallada de una plaza al seleccionarla por su nombre.
 
-## 🚀 Running the Prediction Service Manually
+Pasos para verificar:
+1. Iniciar el servidor:
+uvicorn main:app --reload
 
-The script can be executed directly from the `server/services` folder using Python’s `-m` option to ensure relative paths are respected.
+2. Abrir la documentación interactiva en el navegador:
+👉 http://127.0.0.1:8000/docs
 
-### 1 Install dependencies
+3. Localizar el endpoint:
+GET /plazas/nombre/{nombre}
 
-```bash
-pip install -r server/requirements.txt
-```
+4. En el campo {nombre}, escribir por ejemplo:
+Central Mayorista De Antioquia
 
-```bash
-cd server/services
-python -m prediction_service
-```
+5. Ejecutar la solicitud.
 
-This will execute the example configured at the end of the file:
+### Resultado esperado:
+El sistema devuelve un objeto JSON con los campos:
+* nombre
+* plaza_id
+* ciudad
+* direccion
+* estado
+* numero_comerciantes
+* tipos_productos
+* horarios
+* datos_contacto
+* fecha_creacion
+* fecha_actualizacion
+* coordenadas: un objeto con formato:
+"coordenadas": {
+  "lat": 6.1868153,
+  "lon": -75.5914233
+}
 
-```python
-if __name__ == "__main__":
-    result = predict_prices("Aguacate Común", months_ahead=6)
-    print(result)
-```
+## 📋 Criterio de Aceptación 2: Mostrar ubicación en mapa
+Objetivo:
+El sistema debe proporcionar información suficiente para que el frontend muestre la ubicación de la plaza en un mapa interactivo (por ejemplo, con Google Maps).
 
-##🧩 Expected Output
-* The existence of the CSV file is verified.
-* The product’s price data is loaded and cleaned.
-* A Prophet model is trained or loaded from saved_models/.
-* If a saved model exists, its graph is also reused.
-* Price predictions for the next 6 months are generated.
-* Predictions are saved into the database (Predicciones).
-* An interactive HTML plot is created at:
+Verificación desde el backend:
+1. En la respuesta del endpoint /plazas/nombre/{nombre}, verificar que el campo coordenadas esté presente y tenga el formato:
+"coordenadas": {
+  "lat": valor_latitud,
+  "lon": valor_longitud
+}
 
-```bash
-server/data/prediccion_<nombre_producto>.html
-```
+2. Copiar los valores de latitud y longitud y probarlos manualmente en el navegador:
+https://www.google.com/maps?q=lat,lon
 
-Model performance metrics are printed in the terminal:
+3. Si la ubicación corresponde correctamente a la plaza consultada, el criterio se cumple.
 
-```makefile
-MAE=145.32, RMSE=182.47, MAPE=12.3%
-Predicciones guardadas correctamente.
-```
+## 📋 Criterio adicional: Obtener todas las plazas
+Objetivo:
+Permitir listar todas las plazas registradas en la base de datos con sus coordenadas normalizadas.
 
-## 🌐 Using the /predictions/ Endpoint (FastAPI)
+Pasos para verificar:
+1. En la misma documentación (/docs), ubicar el endpoint:
+GET /plazas/
 
-The prediction service can also be executed through the API endpoint:
+2. Ejecutar la solicitud.
 
-```bash
-GET /predictions/
-```
+Resultado esperado: 
+* Devuelve una lista JSON con todas las plazas registradas.
+* Cada elemento incluye sus datos y las coordenadas normalizadas en el mismo formato que el criterio 1.
 
-Example Request
-```bash
-http://127.0.0.1:8000/predictions/?product_name=Aguacate%20Común&months_ahead=6
-```
-### Notes
-* A secure relative path based on __file__ is used, so there is no need to modify local paths.
-* Prophet models are saved in:
+### Notas
+* Las coordenadas se normalizan automáticamente para uso en Google Maps (latitud positiva y longitud negativa para el hemisferio occidental).
 
-```bash
-server/services/saved_models/<product>_prophet.pkl
-```
-
-* Interactive graphs are generated with Plotly and saved in .html format.
-* If a prediction record already exists, the system skips it to avoid duplicates.
+* El backend no muestra el mapa, solo provee los datos necesarios para que el frontend lo renderice.
