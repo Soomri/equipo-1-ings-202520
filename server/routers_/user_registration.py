@@ -18,9 +18,8 @@ import re
 # Router instance
 router = APIRouter(prefix="/registro", tags=["User Registration"])
 
-# Load environment variables from /server/.env
-env_path = os.path.join(os.path.dirname(__file__), "../.env")
-load_dotenv(dotenv_path=env_path)
+
+
 
 url = os.getenv("SUPABASE_URL")
 key = os.getenv("SUPABASE_KEY")

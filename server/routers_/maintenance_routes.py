@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from datetime import datetime, timezone
 from dateutil import parser
 
-load_dotenv()
+
 
 router = APIRouter()
 
