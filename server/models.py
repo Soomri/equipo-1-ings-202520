@@ -9,14 +9,19 @@ Note:
     Column names in Spanish are maintained to match the existing database schema.
 """
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Date, DECIMAL, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Date, DECIMAL, ForeignKey, Text, TIMESTAMP
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import DOUBLE_PRECISION
+from sqlalchemy.sql import func
 from database import Base
 from datetime import datetime
+from pydantic import BaseModel, Field
+from typing import Optional
 
 # ==========================
 # 👤 User-related models
 # ==========================
+
 class User(Base):
     """
     ORM model for the users table.
@@ -44,7 +49,7 @@ class User(Base):
     nombre = Column(String, nullable=False)
     correo = Column(String, unique=True, index=True, nullable=False)
     contrasena_hash = Column(String, nullable=False)
-    rol = Column(String, default="usuario")  # e.g. "usuario" or "admin"
+    rol = Column(String, default="usuario")  # "usuario" or "admin"
     intentos_fallidos = Column(Integer, default=0)
     cuenta_bloqueada_hasta = Column(DateTime, nullable=True)
 
@@ -89,69 +94,50 @@ class EmailLink(Base):
 # ==========================
 # 🏪 Market-related models
 # ==========================
-class Price(Base):
+
+class Precio(Base):
     """
-    ORM model for product prices at different markets.
-
-    This model tracks historical and current prices of products across
-    various market locations, enabling price comparison and trend analysis.
-
-    Attributes:
-        price_id (int): Primary key, unique price record identifier.
-        product_id (int): Foreign key referencing the product.
-        market_id (int): Foreign key referencing the market location.
-        price_per_kg (Decimal): Price per kilogram with 2 decimal precision.
-        date (Date): Date when this price was recorded.
-        producto (relationship): Many-to-one relationship with Producto model.
-        plaza (relationship): Many-to-one relationship with PlazaMercado model.
-
-    Relationships:
-        producto: The product associated with this price.
-        plaza: The market where this price was recorded.
+    ORM model for product prices at different markets (tabla: precios).
     """
 
     __tablename__ = "precios"
 
-    price_id = Column(Integer, primary_key=True, index=True)
-    product_id = Column(Integer, ForeignKey("productos.producto_id"), nullable=False)
-    market_id = Column(Integer, ForeignKey("plazas_mercado.plaza_id"), nullable=False)
-    price_per_kg = Column(DECIMAL(10, 2), nullable=False)
-    date = Column(Date, nullable=False)
+    precio_id = Column(Integer, primary_key=True, index=True)
+    producto_id = Column(Integer, ForeignKey("productos.producto_id"), nullable=False)
+    plaza_id = Column(Integer, ForeignKey("plazas_mercado.plaza_id", ondelete="CASCADE"), nullable=False)
+    precio_por_kg = Column(DECIMAL(10, 2), nullable=False)
+    tendencia = Column(String, nullable=True)
+    fecha = Column(Date, nullable=False)
+    fuente_dato = Column(String, nullable=True)
+    fecha_creacion = Column(DateTime(timezone=True), server_default=func.now())
+    fecha_actualizacion = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
 
     producto = relationship("Producto", back_populates="precios")
     plaza = relationship("PlazaMercado", back_populates="precios")
 
 
+# =============================
+# ORM Model (SQLAlchemy)
+# =============================
+
 class PlazaMercado(Base):
-    """
-    ORM model for market locations.
-
-    This model represents physical market locations where products are sold.
-    Each market can have multiple price records for different products.
-
-    Attributes:
-        plaza_id (int): Primary key, unique market identifier.
-        nombre (str): Market name.
-        ciudad (str): City where the market is located.
-        precios (relationship): One-to-many relationship with Price model.
-
-    Relationships:
-        precios: List of all price records for this market.
-    """
-
     __tablename__ = "plazas_mercado"
 
     plaza_id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, nullable=False)
-    direccion = Column(String, nullable=True)
+    direccion = Column(String, nullable=False)
     ciudad = Column(String, nullable=False)
-    coordenadas = Column(String, nullable=True)
-    estado = Column(String, default="activa") 
-    fecha_creacion = Column(DateTime, default=datetime.utcnow)
-    fecha_actualizacion = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    coordenadas = Column(String, nullable=False)
+    estado = Column(String, default="activa")
+    horarios = Column(String, nullable=False)
+    numero_comerciantes = Column(Integer)
+    tipos_productos = Column(Text)
+    datos_contacto = Column(String)
+    fecha_creacion = Column(DateTime(timezone=True), server_default=func.now())
+    fecha_actualizacion = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
 
-    precios = relationship("Price", back_populates="plaza")
-
+    # Inverse relationship to Price model
+    precios = relationship("Precio", back_populates="plaza", cascade="all, delete-orphan")
 
 class Producto(Base):
     """
@@ -174,4 +160,4 @@ class Producto(Base):
     producto_id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, unique=True, nullable=False)
 
-    precios = relationship("Price", back_populates="producto")
+    precios = relationship("Precio", back_populates="producto")
