@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-<<<<<<< HEAD
 import { ArrowLeft, Search, Loader2, ShoppingBasket, TrendingUp, Filter, X, Store } from 'lucide-react'
-=======
-import { ArrowLeft, Search, Loader2, ShoppingBasket, TrendingUp } from 'lucide-react'
->>>>>>> b95f6a11bc92049b7ebac8e5edd8809f3c6e76ba
 import { productService } from '../config/api'
 
 /**
@@ -17,15 +13,11 @@ const ProductsListPage = () => {
   const [products, setProducts] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filteredProducts, setFilteredProducts] = useState([])
-<<<<<<< HEAD
   const [selectedPlaza, setSelectedPlaza] = useState('')
   const [plazas, setPlazas] = useState([])
   const [showFilters, setShowFilters] = useState(false)
 
   // Fetch products on mount
-=======
-
->>>>>>> b95f6a11bc92049b7ebac8e5edd8809f3c6e76ba
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -44,7 +36,6 @@ const ProductsListPage = () => {
     fetchProducts()
   }, [])
 
-<<<<<<< HEAD
   // Fetch plazas when filter is shown
   useEffect(() => {
     const fetchPlazas = async () => {
@@ -67,8 +58,6 @@ const ProductsListPage = () => {
     fetchPlazas()
   }, [showFilters, plazas.length])
 
-=======
->>>>>>> b95f6a11bc92049b7ebac8e5edd8809f3c6e76ba
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredProducts(products)
@@ -81,7 +70,6 @@ const ProductsListPage = () => {
   }, [searchQuery, products])
 
   const handleProductClick = (productName) => {
-<<<<<<< HEAD
     // If plaza is selected, pass it as query parameter
     if (selectedPlaza) {
       navigate(`/product/${encodeURIComponent(productName)}?plaza=${encodeURIComponent(selectedPlaza)}`)
@@ -100,13 +88,6 @@ const ProductsListPage = () => {
 
   const clearFilters = () => {
     setSelectedPlaza('')
-=======
-    navigate(`/product/${encodeURIComponent(productName)}`)
-  }
-
-  const handleBack = () => {
-    navigate(-1)
->>>>>>> b95f6a11bc92049b7ebac8e5edd8809f3c6e76ba
   }
 
   if (loading) {
@@ -123,7 +104,6 @@ const ProductsListPage = () => {
   return (
     <>
       <style>{`
-<<<<<<< HEAD
         @keyframes slideDown {
           from {
             opacity: 0;
@@ -134,8 +114,6 @@ const ProductsListPage = () => {
             transform: translateY(0);
           }
         }
-=======
->>>>>>> b95f6a11bc92049b7ebac8e5edd8809f3c6e76ba
         .product-card {
           transition: all 0.3s ease;
           cursor: pointer;
@@ -198,16 +176,10 @@ const ProductsListPage = () => {
             </div>
           </div>
 
-<<<<<<< HEAD
           {/* Search Bar and Filters */}
           <div style={{ marginBottom: '2rem' }}>
             {/* Search Bar */}
             <div style={{ position: 'relative', maxWidth: '600px', marginBottom: '1rem' }}>
-=======
-          {/* Search Bar */}
-          <div style={{ marginBottom: '2rem' }}>
-            <div style={{ position: 'relative', maxWidth: '600px' }}>
->>>>>>> b95f6a11bc92049b7ebac8e5edd8809f3c6e76ba
               <Search 
                 className="w-5 h-5" 
                 style={{ 
@@ -234,7 +206,6 @@ const ProductsListPage = () => {
                 }}
               />
             </div>
-<<<<<<< HEAD
 
             {/* Filter Button */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
@@ -411,8 +382,6 @@ const ProductsListPage = () => {
                 )}
               </div>
             )}
-=======
->>>>>>> b95f6a11bc92049b7ebac8e5edd8809f3c6e76ba
           </div>
 
           {/* Products Grid */}
