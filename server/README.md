@@ -254,4 +254,3 @@ CREATE TABLE password_reset_links (
 
 ✅ **This README was created for the `/server` folder of the Plaze project.**
 It documents the complete setup of the backend, including Supabase integration, environment configuration, dependencies, endpoints, and database schema.
-
