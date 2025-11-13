@@ -18,11 +18,10 @@ from sqlalchemy.pool import QueuePool
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+
 
 # Database URL from .env
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 # SQLAlchemy engine and session
 engine = create_engine(

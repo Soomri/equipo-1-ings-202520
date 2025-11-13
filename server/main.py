@@ -15,10 +15,13 @@ from routers_ import auth, password_recovery
 from routers_.prices import router as prices_router
 from database import Base, engine
 from dotenv import load_dotenv
-from routers_ import plazas_routes, auth
+from routers_ import plazas_routes
 from routers_.health_routes import router as health_router
 from routers_.maintenance_routes import router as maintenance_router
 from routers_.price_history import router as price_history_router
+from routers_.markets import router as markets_router
+from routers_.market_filter import router as market_filter_router
+from routers_.prediction_routes import router as prediction_router
 from routers_.auth import router as auth_router
 from routers_.plazas_routes import router as plazas_router
 from routers_.plaza_router import router as plaza_router
@@ -26,8 +29,6 @@ from routers_.markets import router as markets_router
 from routers_.prediction_routes import router as prediction_router
 from routers_.market_filter import router as market_filter_router
 
-# Load environment variables
-load_dotenv()
 
 # Create tables if they do not exist
 Base.metadata.create_all(bind=engine)
@@ -39,47 +40,29 @@ bearer_scheme = HTTPBearer()
 # ========================================
 # CORS Configuration
 # ========================================
-# Enable Cross-Origin Resource Sharing (CORS) to allow frontend requests
-# This is required for the React frontend to communicate with the API
-# Allowed origins include common development ports (3000, 5173)
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",      # Create React App default port
-        "http://localhost:5173",      # Vite default port
-        "http://127.0.0.1:3000",      # Alternative localhost notation
-        "http://127.0.0.1:5173",      # Alternative localhost notation (Vite)
-    ],
-    allow_credentials=True,           # Allow cookies and authentication headers
-    allow_methods=["*"],              # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
-    allow_headers=["*"],              # Allow all headers (including Authorization)
+    allow_origins=["*"],  # Allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-#  Global error handler  
+# ========================================
+# Global error handler
+# ========================================
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
-    # Handle forbidden access (403)
     if exc.status_code == 403:
-        return JSONResponse(
-            status_code=403,
-            content={"detail": "Acceso prohibido: no tienes permisos o no estás autenticado."}
-        )
-    # Handle unauthorized access (401)
+        return JSONResponse(status_code=403, content={"detail": "Acceso prohibido: no tienes permisos o no estás autenticado."})
     elif exc.status_code == 401:
-        return JSONResponse(
-            status_code=401,
-            content={"detail": "No estás autenticado o tu token no es válido."}
-        )
-    # Default behavior for other HTTP exceptions
+        return JSONResponse(status_code=401, content={"detail": "No estás autenticado o tu token no es válido."})
     else:
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={"detail": exc.detail},
-        )
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
-
-# Include routers
+# ========================================
+# Routers
+# ========================================
 app.include_router(user_registration_router)
 app.include_router(auth.router)
 app.include_router(password_recovery.router, tags=["Password Recovery"])
@@ -87,6 +70,8 @@ app.include_router(prices_router, tags=["Prices"])
 app.include_router(health_router)
 app.include_router(maintenance_router)
 app.include_router(price_history_router)
+
+# --- Market & Plaza routes ---
 app.include_router(plaza_router, tags=["Plazas de Mercado"])  # Public GET endpoints
 app.include_router(plazas_routes.router)  # Admin POST/PUT/DELETE endpoints
 app.include_router(markets_router, tags=["Markets"])
@@ -96,24 +81,5 @@ app.include_router(market_filter_router, tags=["Product Prices"])
 
 @app.get("/")
 def root():
-    """
-    Root endpoint of the API.
-
-    This endpoint serves as a simple health check and welcome message
-    for the Market Prices Plaze API. It confirms that the application
-    is running and accessible.
-
-    Returns:
-        dict: A dictionary containing:
-            - message (str): Confirmation message that the API is operational.
-
-    Example:
-        >>> response = root()
-        >>> print(response)
-        {'message': 'API funcionando 🚀'}
-
-    Note:
-        This endpoint does not require authentication and can be used
-        for basic connectivity testing.
-    """
+    """Root endpoint of the API."""
     return {"message": "API funcionando 🚀"}
