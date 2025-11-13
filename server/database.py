@@ -1,50 +1,37 @@
 # database.py
 """
-This module sets up the SQLAlchemy database connection and session for the application.
-- Loads environment variables using python-dotenv.
-- Retrieves the database URL from environment variables.
-- Creates a SQLAlchemy engine with a connection pool for efficient concurrency.
-- Configures a session factory (`SessionLocal`) for database interactions.
-- Defines a base class (`Base`) for declarative ORM models.
-
-Usage:
-    Import `SessionLocal` to create database sessions.
-    Inherit from `Base` to define ORM models.
+Database connection setup for SQLAlchemy on Render.
+Uses environment variables provided in the Render dashboard.
 """
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.pool import QueuePool
 import os
-from dotenv import load_dotenv
 
-
-
-# Database URL from .env
+# Render provides DATABASE_URL via environment variables
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-# SQLAlchemy engine and session
+# SQLAlchemy engine with connection pooling
 engine = create_engine(
     DATABASE_URL,
-    poolclass=QueuePool,   # Use QueuePool to manage a limited number of connections
-    pool_size=5,           # Maximum 5 active connections
-    max_overflow=2,        # Allow 2 extra temporary connections during high load
-    pool_timeout=30,       # Wait up to 30 seconds for a free connection before raising an error
-    pool_recycle=1800,     # Recycle connections every 30 minutes to prevent timeouts
+    poolclass=QueuePool,
+    pool_size=5,
+    max_overflow=2,
+    pool_timeout=30,
+    pool_recycle=1800,
+    pool_pre_ping=True  
 )
 
-# Session factory for database operations
+# Session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base class for ORM models
+# Base model for ORM
 Base = declarative_base()
 
 
 def get_db():
-    """
-    Dependency function to get a database session.
-    Ensures the session is properly closed after use.
-    """
+    """Dependency that yields a database session."""
     db = SessionLocal()
     try:
         yield db
