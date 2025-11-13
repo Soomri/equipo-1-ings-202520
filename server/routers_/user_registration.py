@@ -110,14 +110,3 @@ async def register_user(user: UserRegister):
 
     return {"message": "User successfully registered."}
 
-
-# =====================================
-# Global validation error handler
-# =====================================
-@router.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc):
-    """Handles invalid request formats."""
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={"detail": "Invalid input data", "errors": exc.errors()},
-    )
