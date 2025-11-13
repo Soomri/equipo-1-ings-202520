@@ -21,6 +21,9 @@ const PlazaDetailPage = () => {
       
       try {
         const response = await plazaService.getPlazaByName(plazaName)
+        console.log('Plaza data received:', response) // Debug: ver todos los campos disponibles
+        console.log('datos_contacto:', response.datos_contacto) // Debug: campo de contacto
+        console.log('tipos_productos:', response.tipos_productos) // Debug: campo de productos
         setPlaza(response)
       } catch (err) {
         console.error('Error fetching plaza details:', err)
@@ -229,44 +232,33 @@ const PlazaDetailPage = () => {
                   </div>
                 )}
 
-                {/* Phone */}
-                {plaza.telefono && (
+                {/* Contact Info (datos_contacto) */}
+                {plaza.datos_contacto && (
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                       <Phone className="w-5 h-5" style={{ color: '#4CA772' }} />
                       <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#666', textTransform: 'uppercase' }}>
-                        Teléfono
+                        Contacto
                       </span>
                     </div>
-                    <p style={{ fontSize: '1.125rem', color: '#333', margin: 0, paddingLeft: '1.75rem' }}>
-                      {plaza.telefono}
+                    <p style={{ fontSize: '1.125rem', color: '#333', margin: 0, paddingLeft: '1.75rem', whiteSpace: 'pre-line' }}>
+                      {plaza.datos_contacto}
                     </p>
                   </div>
                 )}
 
-                {/* Website */}
-                {plaza.sitio_web && (
+                {/* Product Types (tipos_productos) */}
+                {plaza.tipos_productos && (
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                      <Globe className="w-5 h-5" style={{ color: '#4CA772' }} />
+                      <Store className="w-5 h-5" style={{ color: '#4CA772' }} />
                       <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#666', textTransform: 'uppercase' }}>
-                        Sitio Web
+                        Tipos de Productos
                       </span>
                     </div>
-                    <a 
-                      href={plaza.sitio_web.startsWith('http') ? plaza.sitio_web : `https://${plaza.sitio_web}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ 
-                        fontSize: '1.125rem', 
-                        color: '#4CA772', 
-                        textDecoration: 'none',
-                        paddingLeft: '1.75rem',
-                        display: 'block'
-                      }}
-                    >
-                      {plaza.sitio_web}
-                    </a>
+                    <p style={{ fontSize: '1.125rem', color: '#333', margin: 0, paddingLeft: '1.75rem', whiteSpace: 'pre-line' }}>
+                      {plaza.tipos_productos}
+                    </p>
                   </div>
                 )}
               </div>
