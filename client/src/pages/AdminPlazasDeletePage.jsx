@@ -35,10 +35,8 @@ const AdminPlazasDeletePage = () => {
 
   const loadPlazas = async () => {
     try {
-      const data = await plazaService.getMedellinMarkets()
-      if (data.plazas) {
-        setPlazas(data.plazas)
-      }
+      const data = await plazaService.getAllPlazas()
+      setPlazas(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Error loading plazas:', error)
       setErrorMessage('Error al cargar las plazas')
@@ -63,11 +61,10 @@ const AdminPlazasDeletePage = () => {
     setErrorMessage('')
 
     try {
-      // Simulate API call (will be replaced with actual API call later)
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const selectedPlaza = plazas.find(p => p.plaza_id.toString() === selectedPlazaId)
       
-      const selectedPlaza = plazas.find(p => p.id.toString() === selectedPlazaId)
-      console.log('Deleting plaza:', selectedPlaza)
+      // Call API to delete plaza
+      await plazaService.deletePlaza(parseInt(selectedPlazaId))
       
       // Close confirmation and reset
       setShowConfirmation(false)
@@ -75,11 +72,11 @@ const AdminPlazasDeletePage = () => {
       
       // Show success message and redirect
       alert(`Plaza "${selectedPlaza?.nombre}" eliminada exitosamente`)
-      navigate('/admin/plazas')
+      navigate('/admin/plazas/list')
       
     } catch (error) {
       console.error('Error deleting plaza:', error)
-      setErrorMessage('Error al eliminar la plaza. Intenta nuevamente.')
+      setErrorMessage(error.message || 'Error al eliminar la plaza. Intenta nuevamente.')
       setShowConfirmation(false)
     } finally {
       setIsLoading(false)
@@ -91,7 +88,7 @@ const AdminPlazasDeletePage = () => {
   }
 
   const getSelectedPlaza = () => {
-    return plazas.find(p => p.id.toString() === selectedPlazaId)
+    return plazas.find(p => p.plaza_id.toString() === selectedPlazaId)
   }
 
   if (!currentUser.isAuthenticated || !isAdmin) {
@@ -217,8 +214,8 @@ const AdminPlazasDeletePage = () => {
               >
                 <option value="">-- Selecciona una plaza --</option>
                 {plazas.map((plaza) => (
-                  <option key={plaza.id} value={plaza.id}>
-                    {plaza.nombre} - {plaza.ciudad} (ID: {plaza.id})
+                  <option key={plaza.plaza_id} value={plaza.plaza_id}>
+                    {plaza.nombre} - {plaza.ciudad} (ID: {plaza.plaza_id})
                   </option>
                 ))}
               </select>
@@ -363,7 +360,7 @@ const AdminPlazasDeletePage = () => {
                   fontSize: '14px',
                   color: '#666'
                 }}>
-                  {getSelectedPlaza()?.ciudad} - ID: {getSelectedPlaza()?.id}
+                  {getSelectedPlaza()?.ciudad} - ID: {getSelectedPlaza()?.plaza_id}
                 </p>
               </div>
 

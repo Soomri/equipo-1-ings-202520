@@ -24,9 +24,11 @@ from routers_.market_filter import router as market_filter_router
 from routers_.prediction_routes import router as prediction_router
 from routers_.auth import router as auth_router
 from routers_.plazas_routes import router as plazas_router
+from routers_.plaza_router import router as plaza_router
+from routers_.markets import router as markets_router
+from routers_.prediction_routes import router as prediction_router
+from routers_.market_filter import router as market_filter_router
 
-# Load environment variables
-load_dotenv()
 
 # Create tables if they do not exist
 Base.metadata.create_all(bind=engine)
@@ -68,10 +70,14 @@ app.include_router(prices_router, tags=["Prices"])
 app.include_router(health_router)
 app.include_router(maintenance_router)
 app.include_router(price_history_router)
-app.include_router(plazas_routes.router)
+
+# --- Market & Plaza routes ---
+app.include_router(plaza_router, tags=["Plazas de Mercado"])  # Public GET endpoints
+app.include_router(plazas_routes.router)  # Admin POST/PUT/DELETE endpoints
 app.include_router(markets_router, tags=["Markets"])
-app.include_router(market_filter_router)
 app.include_router(prediction_router)
+app.include_router(market_filter_router, tags=["Product Prices"])
+
 
 @app.get("/")
 def root():

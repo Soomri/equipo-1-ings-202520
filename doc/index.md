@@ -65,6 +65,7 @@ Este proyecto está orientado a brindar valor principalmente a:
 |------------|----------------|
 | [📊 Análisis](./analysis/index.md) | Contiene los requisitos funcionales y no funcionales del sistema |
 | [🎨 Diseño](./design/index.md) | Contiene los diseño UX/UI, los UML y las decisiones Backend y Frontend |
+| [🏃🏻 Sprint](./sprint.md) | Contiene los diagramas Burndown y screenshots del Backlog trabajados cada semana |
 
 ## 🗂️ URL tablero Backlog
 
