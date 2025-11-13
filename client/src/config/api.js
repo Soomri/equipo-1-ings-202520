@@ -72,16 +72,19 @@ export const productService = {
       return response.data
     } catch (error) {
       // Better error handling
-      if (error.response) {
-        // Server responded with error status
+      if (error.response?.status === 404) {
+        // Product has no historical data
+        throw new Error('Este producto no tiene datos históricos registrados en la base de datos')
+      } else if (error.response) {
+        // Other server errors
         const detail = error.response.data?.detail || error.response.statusText
-        throw new Error(`Error ${error.response.status}: ${detail}`)
+        throw new Error(`${detail}`)
       } else if (error.request) {
         // Request was made but no response received
-        throw new Error('No se pudo conectar al servidor. Verifica que el backend esté corriendo en http://localhost:8000')
+        throw new Error('No se pudo conectar al servidor')
       } else {
         // Something else happened
-        throw new Error(`Error getting history: ${error.message}`)
+        throw new Error(`Error al obtener el historial: ${error.message}`)
       }
     }
   },
@@ -111,68 +114,127 @@ export const productService = {
     }
   },
 
-  // Get price predictions (F-03)
-  getPricePredictions: async (product, city, plaza = '', months = 3) => {
+  // Get active plazas only (for filtering)
+  getActivePlazas: async () => {
     try {
-      const params = {
-        product: product.trim(),
-        city: city || 'Medellín',
-        months,
-        ...(plaza && { plaza })
-      }
-      
-      const response = await api.get('/prices/predictions', { params })
+      const response = await api.get('/product-prices/plazas')
       return response.data
     } catch (error) {
-      throw new Error(`Error getting predictions: ${error.message}`)
+      throw new Error(`Error getting active plazas: ${error.message}`)
     }
   },
 
-  // Search products (F-11)
+  // Get price predictions using Prophet model
+  getPricePredictions: async (productName, monthsAhead = 6) => {
+    try {
+      const response = await api.get('/predictions/', {
+        params: {
+          product_name: productName,
+          months_ahead: monthsAhead
+        }
+      })
+      return response.data
+    } catch (error) {
+      if (error.response?.status === 404) {
+        throw new Error('No hay suficientes datos históricos para generar predicciones de este producto')
+      }
+      throw new Error(`Error al obtener predicciones: ${error.response?.data?.message || error.message}`)
+    }
+  },
+
+  // Search products with suggestions (F-11)
   searchProducts: async (query) => {
     try {
-      const response = await api.get('/products/search', {
-        params: { q: query.trim() }
+      const response = await api.get('/prices/search/', {
+        params: { query: query.trim() }
       })
       return response.data
     } catch (error) {
-      throw new Error(`Error searching products: ${error.message}`)
+      // Return error with details for better handling
+      if (error.response?.status === 404) {
+        return {
+          error: true,
+          status: 404,
+          detail: error.response.data?.detail || 'Producto no encontrado',
+          suggestions: error.response.data?.sugerencias || []
+        }
+      }
+      throw error
     }
   },
 
-  // Get search suggestions (F-12)
-  getSearchSuggestions: async (query) => {
+  // Get all products list
+  getAllProducts: async () => {
     try {
-      const response = await api.get('/products/suggestions', {
-        params: { q: query.trim() }
-      })
+      const response = await api.get('/prices/products/')
       return response.data
     } catch (error) {
-      throw new Error(`Error getting suggestions: ${error.message}`)
+      throw new Error(`Error getting products: ${error.message}`)
     }
   }
 }
 
 export const plazaService = {
-  // Get market plazas (F-23)
-  getPlazas: async (city = 'Medellín') => {
+  // Get all plazas
+  getAllPlazas: async () => {
     try {
-      const response = await api.get('/plazas', {
-        params: { city }
-      })
+      const response = await api.get('/plazas/')
       return response.data
     } catch (error) {
       throw new Error(`Error getting plazas: ${error.message}`)
     }
   },
 
-  // Get detailed plaza information (F-23)
-  getPlazaDetails: async (plazaId) => {
+  // Get plaza by name
+  getPlazaByName: async (plazaName) => {
     try {
-      const response = await api.get(`/plazas/${plazaId}`)
+      const response = await api.get(`/plazas/nombre/${encodeURIComponent(plazaName)}`)
       return response.data
     } catch (error) {
       throw new Error(`Error getting plaza details: ${error.message}`)
+    }
+  },
+
+  // Get active plazas only (for filtering)
+  getActivePlazas: async () => {
+    try {
+      const response = await api.get('/product-prices/plazas')
+      return response.data
+    } catch (error) {
+      throw new Error(`Error getting active plazas: ${error.message}`)
+    }
+  },
+
+  // Admin: Create plaza
+  createPlaza: async (plazaData) => {
+    try {
+      const response = await api.post('/plazas/', plazaData)
+      return response.data
+    } catch (error) {
+      const message = error.response?.data?.detail || error.message || 'Error al crear plaza'
+      throw new Error(message)
+    }
+  },
+
+  // Admin: Update plaza
+  updatePlaza: async (plazaId, plazaData) => {
+    try {
+      const response = await api.put(`/plazas/${plazaId}`, plazaData)
+      return response.data
+    } catch (error) {
+      const message = error.response?.data?.detail || error.message || 'Error al actualizar plaza'
+      throw new Error(message)
+    }
+  },
+
+  // Admin: Delete plaza
+  deletePlaza: async (plazaId) => {
+    try {
+      const response = await api.delete(`/plazas/${plazaId}`)
+      return response.data
+    } catch (error) {
+      const message = error.response?.data?.detail || error.message || 'Error al eliminar plaza'
+      throw new Error(message)
     }
   }
 }

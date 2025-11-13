@@ -18,6 +18,8 @@ from jose import JWTError
 from jwt_manager import create_access_token, verify_token
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from utils.email_utils import send_lock_email
+from fastapi.security import HTTPBearer
+security = HTTPBearer()
 
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -60,26 +62,24 @@ def check_token_not_blacklisted(token: str):
         raise HTTPException(status_code=401, detail="Token inválido (logout requerido)")
 
 
-def get_current_user_from_token(authorization: Optional[str] = Header(None)) -> dict:
+def get_current_user_from_token(
+    credentials: HTTPAuthorizationCredentials = Security(security)
+) -> dict:
     """
-    Validate the Authorization header and return the decoded token payload.
-    Raises HTTPException if invalid or expired.
+    Validate and decode the Bearer token from Authorization header.
     """
-    token = get_bearer_token(authorization)
-    if not token:
-        raise HTTPException(status_code=401, detail="Token no proporcionado")
-
+    token = credentials.credentials
     check_token_not_blacklisted(token)
 
     try:
         payload = verify_token(token)
     except JWTError:
-        raise HTTPException(status_code=401, detail="Token inválido o expirado")
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
 
     if "sub" not in payload:
-        raise HTTPException(status_code=401, detail="Token inválido: falta información")
-    return payload
+        raise HTTPException(status_code=401, detail="Invalid token: missing subject")
 
+    return payload
 
 # ===============================
 # LOGIN ENDPOINT

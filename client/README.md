@@ -1,5 +1,6 @@
 # PLAZE - Frontend Client
 
+
 Web application for querying product prices in Medellín's market plazas.
 
 ## 🚀 Features
@@ -13,21 +14,35 @@ Web application for querying product prices in Medellín's market plazas.
 
 ### Authentication & User Management
 - **User Registration** (F-05): Complete registration flow with backend validation
+  - Includes link to login page for existing users
+  - Password strength requirements clearly displayed
 - **Registration Confirmation**: Success page with user feedback
 - **User Login** (F-06): Secure authentication with JWT tokens
+  - Includes link to registration page for new users
+  - Direct link to password recovery
 - **Password Recovery**: Email-based password reset flow
 - **Password Reset**: Secure password change with token validation
 - **Account Lockout Protection**: Automatic lockout after 3 failed login attempts with recovery email
+- **User Display Optimization**: Smart name truncation (first name only, max 15 chars)
 
 ### Application Features
 - **Current price queries** (F-01): Search prices by product, city, and plaza
 - **Price history visualization** (F-02): Interactive charts showing historical price trends
-- **Advanced filtering**: Filter searches by specific market plazas
+- **Advanced filtering**: Filter searches by specific market plazas (lazy loading)
 - **Price comparison**: Compare prices between different plazas
 - **Statistical analysis**: Key metrics, trends, and price variations over time
 - **Intuitive interface**: Usability-focused design (NF-01)
-- **Responsive**: Adaptable to different devices
+- **Fully Responsive**: Optimized for desktop, tablet, and mobile devices
+- **Adaptive Layouts**: All pages dynamically adjust to screen size
 - **Quick search**: With automatic suggestions
+- **Performance Optimized**: Lazy loading of filters to reduce unnecessary API calls
+
+### Administrator Features
+- **Role-based Access Control**: Admin users have special privileges
+- **Admin Badge**: Visual indicator "MODO ADMIN" in header for administrators
+- **Admin Panel Access**: Dedicated administration page for managing plazas
+- **Protected Routes**: Admin-only pages with automatic redirection
+- **Admin Button**: Special "Administrar Plazas" button on HomePage (admin-only)
 
 ## 🛠️ Technologies
 
@@ -100,7 +115,7 @@ npm run dev
 - [x] **Password recovery flow** with email integration
 - [x] **Password reset page** with token validation
 - [x] **Account lockout protection** (3 failed attempts)
-- [x] Product search component with plaza filtering
+- [x] **Product search component with plaza filtering**
 - [x] **Price history visualization** (F-02) with interactive charts
 - [x] **Product detail page** with comprehensive analysis
 - [x] **Statistical analysis** (trends, variations, key metrics)
@@ -114,17 +129,40 @@ npm run dev
 - [x] User logout flow (returns to landing page)
 - [x] Form validation (client and server-side)
 - [x] Loading states for async operations
+- [x] **UX Enhancements** (October 2024):
+  - [x] Visible labels on all form inputs
+  - [x] Improved text contrast across all inputs
+  - [x] Call-to-action heading on HomePage search
+  - [x] Redesigned filter system with visual indicators
+  - [x] Active filter badges and chips
+  - [x] Functional header search bar
+  - [x] Smart footer with section navigation
+  - [x] Footer removed from HomePage and ProductDetailPage
+- [x] **Navigation & Usability** (November 2024):
+  - [x] Cross-navigation links between login and register forms
+  - [x] Smart name truncation in header (first name only, 15 char limit)
+  - [x] Adaptive form containers (grow with content)
+- [x] **Responsive Design System** (November 2024):
+  - [x] All pages fully responsive (mobile, tablet, desktop)
+  - [x] Adaptive Header with balanced layout
+  - [x] Responsive search components
+  - [x] Mobile-optimized forms and cards
+  - [x] Media queries for all breakpoints (480px, 768px, 992px, 1200px, 1400px)
+- [x] **Administrator System** (November 2024):
+  - [x] Role-based access control
+  - [x] Admin badge in UserMenu
+  - [x] Admin panel navigation button
+  - [x] AdminPlazasPage with route protection
+  - [x] Admin-only features visibility control
+- [x] **Performance Optimizations** (November 2024):
+  - [x] Lazy loading of plaza filters (on-demand)
+  - [x] Optimized API calls (no unnecessary requests)
 
 ### 🔄 In Progress
 - [ ] Price predictions (F-03)
-- [ ] Plaza management (admin features)
+- [ ] Plaza CRUD operations (admin features)
 - [ ] User profile management
-
-### 📝 Pending
-- [ ] Predictions (F-03)
-- [ ] Comparison between plazas (F-04)
-- [ ] Custom baskets (F-07)
-- [ ] Admin panel for plaza management
+- [ ] Admin dashboard statistics
 
 ---
 
@@ -134,26 +172,27 @@ npm run dev
 client/
 ├── src/
 │   ├── components/              # Reusable components
-│   │   ├── Header.jsx           # Application header
+│   │   ├── Header.jsx           # Application header with functional search
 │   │   ├── LandingHeader.jsx    # Landing page header
-│   │   ├── Footer.jsx           # Footer
+│   │   ├── Footer.jsx           # Smart footer with section navigation
 │   │   ├── PageTransition.jsx   # Page transition wrapper
-│   │   ├── ProductSearch.jsx    # Search form with plaza filtering
+│   │   ├── ProductSearch.jsx    # Advanced search with visual filter indicators
 │   │   ├── PriceResults.jsx     # Price results
 │   │   ├── PriceHistoryChart.jsx # Interactive price history chart (recharts)
 │   │   ├── PriceStats.jsx       # Price statistics cards
 │   │   ├── TrendPeriods.jsx     # Price trend analysis display
 │   │   ├── QuickStats.jsx       # Quick statistics
-│   │   └── UserMenu.jsx         # User menu with logout
+│   │   └── UserMenu.jsx         # User menu with logout & admin badge
 │   ├── pages/                   # Main pages
-│   │   ├── LandingPage.jsx      # Landing page (root)
-│   │   ├── HomePage.jsx         # Main application page
-│   │   ├── ProductDetailPage.jsx # Product detail with price history (F-02)
-│   │   ├── LoginPage.jsx        # Login page
-│   │   ├── RegisterPage.jsx     # Registration page
-│   │   ├── RegisterConfirmationPage.jsx  # Registration success
-│   │   ├── PasswordRecoveryPage.jsx      # Password recovery
-│   │   └── ResetPasswordPage.jsx         # Password reset with token
+│   │   ├── LandingPage.jsx      # Landing page with section IDs (fully responsive)
+│   │   ├── HomePage.jsx         # Main page with CTA and enhanced search (responsive)
+│   │   ├── ProductDetailPage.jsx # Product detail with price history (F-02, responsive)
+│   │   ├── LoginPage.jsx        # Login page (fully responsive & adaptive)
+│   │   ├── RegisterPage.jsx     # Registration page (fully responsive & adaptive)
+│   │   ├── RegisterConfirmationPage.jsx  # Registration success (responsive)
+│   │   ├── PasswordRecoveryPage.jsx      # Password recovery (responsive)
+│   │   ├── ResetPasswordPage.jsx         # Password reset (responsive)
+│   │   └── AdminPlazasPage.jsx  # Admin panel for plaza management (admin-only)
 │   ├── styles/                  # Style files
 │   │   ├── transitions.css      # Page transition animations
 │   │   └── product-detail.css   # Product detail page styles
@@ -187,7 +226,11 @@ The application uses the following route structure:
 - **`/home`** - Main application page with product search and price queries
 - **`/product/:productName`** - Product detail page with price history and analysis (F-02)
   - Supports query parameter: `?plaza=PlazaName` for filtering by specific plaza
-- More routes will be added for authenticated users
+
+### Admin Routes (require admin role)
+- **`/admin/plazas`** - Plaza management panel (admin-only)
+  - Automatically redirects non-admin users to `/home`
+  - Displays admin badge and management interface
 
 ### Route Behavior
 - First-time visitors land on **`/`** (Landing Page)
@@ -201,7 +244,9 @@ The application uses the following route structure:
 ### Route Protection
 - `/register-confirmation` validates registration state before rendering
 - `/reset-password` extracts and validates token from URL query parameters
+- `/admin/plazas` checks admin role and redirects non-admin users
 - Redirects to appropriate pages if validation fails
+- Automatic logout redirect on token expiration (401 errors)
 
 ---
 
@@ -245,6 +290,94 @@ The application uses the following route structure:
 - **Email Verification**: Recovery links sent to registered email
 - **Client-side Validation**: Immediate feedback on form errors
 - **Server-side Validation**: Final validation on backend
+- **Role-based Access**: Admin features protected by role verification
+- **Automatic Redirection**: Non-admin users redirected from protected routes
+
+---
+
+## 👑 Administrator System
+
+### Overview
+Plaze includes a role-based access control system with two user types:
+- **`usuario`**: Regular user with standard features
+- **`admin`**: Administrator with additional management capabilities
+
+### Admin Features
+
+#### 1. Visual Indicators
+**Admin Badge in Header:**
+- Orange badge displaying "MODO ADMIN" appears below the user's name
+- Visible only to users with admin role
+- Located in the UserMenu component in the header
+
+**Admin Button on HomePage:**
+- Orange "Administrar Plazas" button with Settings icon
+- Appears below the search component
+- Only visible to admin users
+- Navigates to `/admin/plazas`
+
+#### 2. Admin Panel (`/admin/plazas`)
+- **Access**: Restricted to admin users only
+- **Protection**: Automatic redirect to `/home` for non-admin users
+- **Features**: Plaza management interface (expandable)
+- **Design**: Fully responsive with admin branding
+
+### How It Works
+
+#### Role Detection
+The frontend checks the user's role from localStorage:
+```javascript
+const currentUser = authService.getCurrentUser()
+const isAdmin = currentUser.role === 'admin'
+```
+
+#### Role Assignment
+- User role is assigned by the backend during login
+- Stored in `localStorage` with key `user_role`
+- Value: `"admin"` for administrators, `"usuario"` for regular users
+
+#### Conditional Rendering
+Admin-exclusive elements use conditional rendering:
+```javascript
+{isAdmin && (
+  <div>Admin-only content</div>
+)}
+```
+
+### User Experience
+
+#### Regular User:
+- ✅ Full access to all standard features
+- ✅ Can search products, view prices, analyze history
+- ❌ Does NOT see admin badge
+- ❌ Does NOT see "Administrar Plazas" button
+- ❌ Cannot access `/admin/plazas` (redirected to home)
+
+#### Administrator:
+- ✅ All regular user features PLUS:
+- ✅ "MODO ADMIN" badge visible in header
+- ✅ "Administrar Plazas" button on HomePage
+- ✅ Access to `/admin/plazas` panel
+- ✅ Can navigate normally through all pages
+- ✅ Additional management capabilities (expandable)
+
+### Debugging Admin Access
+
+If you can't access admin features:
+
+1. **Check browser console** (F12):
+   - Look for: `HomePage - Role: admin | Is Admin: true`
+   - If you see `Role: usuario` or `Role: null`, contact backend team
+
+2. **Verify localStorage** (DevTools → Application → Local Storage):
+   - Key: `user_role`
+   - Expected value: `"admin"`
+
+3. **Verify authentication**:
+   - Ensure you're logged in
+   - Token should be present in localStorage (`access_token`)
+
+4. **Logout and login again** if role was recently changed
 
 ---
 
@@ -271,9 +404,12 @@ The application features smooth CSS-based page transitions for a modern user exp
 ### User Flow
 - **Logout behavior**: Clicking "Cerrar sesión" clears tokens and returns to landing page
 - **Navigation**: Seamless transitions between all routes
+- **Cross-page links**: Login and register forms include links to navigate between them
+- **Name display**: User's first name shown in header, truncated to 15 chars if needed
 - **Loading states**: Button text changes and disabling during requests ("Enviando...", "Cambiando...")
 - **Form validation**: Real-time feedback on invalid inputs
 - **Success messages**: Green confirmation boxes for successful operations
+- **Admin workflow**: Admin users see additional navigation options and management tools
 
 ---
 
@@ -342,12 +478,14 @@ The `api.js` file includes:
   - `getPriceVariations(period)` - Get price variations by period
 - **`authService`**: Authentication and user management
   - `register(userData)` - User registration
-  - `login(email, password)` - User login
-  - `logout()` - User logout
+  - `login(email, password)` - User login (stores role in localStorage)
+  - `logout()` - User logout (clears all user data including role)
   - `recoverPassword(email)` - Request password recovery
   - `resetPassword(token, newPassword)` - Reset password
   - `isAuthenticated()` - Check authentication status
   - `getCurrentUser()` - Get current user info from localStorage
+    - Returns: `{ email, name, role, isAuthenticated }`
+    - Role can be: `"admin"` or `"usuario"`
 
 ---
 
@@ -424,11 +562,57 @@ The design follows Figma specifications and complies with usability requirements
 - **Spacing**: Consistent padding and margins
 - **Components**: Unified cards, buttons, and forms across all pages
 
-### Responsive Design
-- **Mobile First**: Mobile-optimized design
-- **Flexible layouts**: Adapts to different screen sizes
-- **Centered forms**: 600px width forms with proper spacing
-- **Readable text**: 18px base font size for inputs
+### Responsive & Adaptive Design (November 2024)
+All pages are now fully responsive with adaptive layouts:
+
+#### Breakpoints
+- **480px**: Mobile devices (small phones)
+- **768px**: Tablets (portrait)
+- **992px**: Tablets (landscape) and small laptops
+- **1200px**: Laptops
+- **1400px**: Large laptops and desktops
+
+#### Key Features
+- **Adaptive Containers**: Use `minHeight` instead of fixed `height`, grow with content
+- **Flexible Grids**: Grid layouts collapse to single column on mobile
+- **Responsive Images**: Scale proportionally on all devices
+- **Adaptive Typography**: Font sizes scale based on screen size
+- **Mobile-optimized Forms**: Full-width inputs on small screens
+- **Balanced Header**: Logo, search bar, and user menu proportionally distributed
+- **Smart Truncation**: User names intelligently shortened to fit space
+
+#### Components with Responsive Design
+- ✅ **Header**: Fully responsive with adaptive search bar
+- ✅ **UserMenu**: Name truncation and admin badge display
+- ✅ **ProductSearch**: Full-width input on mobile, lazy-loaded filters
+- ✅ **All Pages**: LoginPage, RegisterPage, HomePage, LandingPage, ProductDetailPage, etc.
+- ✅ **Forms**: Adaptive width and padding based on screen size
+- ✅ **Buttons**: Responsive sizing and positioning
+
+---
+
+## ⚡ Performance Optimizations
+
+### Lazy Loading
+**Plaza Filters (ProductSearch component):**
+- Plazas are loaded only when user clicks "Filtrar por plazas"
+- Prevents unnecessary `GET /prices/options/` requests on HomePage load
+- Improves initial page load time
+- Reduces server load
+
+### Smart Data Fetching
+- Components fetch data only when needed
+- No duplicate requests for the same data
+- Proper error handling to prevent failed request loops
+
+### Responsive Images
+- Images use proper sizing for each breakpoint
+- Optimized loading with `objectFit` for better rendering
+
+### Code Splitting
+- React Router handles automatic code splitting by route
+- Each page loads independently
+- Reduces initial bundle size
 
 ---
 
@@ -459,6 +643,12 @@ If the server is unavailable:
 - Verify token hasn't expired
 - Ensure backend authentication routes are working
 
+### Admin Access Issues
+- Verify your user has `role: "admin"` in localStorage
+- Check console logs: Should show `Is Admin: true`
+- Contact backend team to update your user role in the database
+- Logout and login again after role changes
+
 ### Password Recovery Not Working
 - Verify backend SMTP configuration is correct
 - Check spam folder for recovery emails
@@ -478,40 +668,78 @@ Make sure the backend server has CORS configured to allow requests from `http://
 
 ---
 
-## 🧪 Testing the Application
+## 📅 Recent Updates - November 2024
 
-### Test Registration Flow
-1. Go to `http://localhost:3000/register`
-2. Fill form with valid data:
-   - Name: Any name
-   - Email: Valid email format
-   - Password: Min 8 chars, 1 uppercase, 1 number, 1 special char
-3. Submit and verify redirect to confirmation page
+### Authentication UX Improvements
+**Cross-navigation between forms:**
+- Login page now includes "¿Aún no tienes una cuenta? Regístrate ahora" link
+- Register page now includes "¿Ya tienes una cuenta? Inicia sesión" link
+- Improves user flow between authentication pages
 
-### Test Login Flow
-1. Go to `http://localhost:3000/login`
-2. Enter registered credentials
-3. Verify redirect to `/home` with user menu
+**User display optimization:**
+- Names in header truncated to first name only
+- Maximum 15 characters with "..." if needed
+- Example: "Juan Pérez" → "Juan", "Paragutirimicuaro" → "Paragutirimi..."
 
-### Test Password Recovery
-1. Go to `http://localhost:3000/password-recovery`
-2. Enter registered email
-3. Check email inbox for recovery link
-4. Click link to land on reset page
-5. Enter new password and confirm
-6. Verify success message and ability to login
+### Complete Responsive Design Implementation
+**All pages made fully responsive:**
+- ✅ LoginPage & RegisterPage - Adaptive forms with flexible containers
+- ✅ PasswordRecoveryPage & ResetPasswordPage - Responsive success messages
+- ✅ RegisterConfirmationPage - Adaptive confirmation boxes
+- ✅ LandingPage - Complex multi-section layout fully responsive
+- ✅ HomePage - Adaptive hero section and search
+- ✅ ProductDetailPage - Responsive charts and statistics
 
-### Test Account Lockout
-1. Go to `http://localhost:3000/login`
-2. Enter wrong password 3 times
-3. Verify account lockout message
-4. Check email for recovery link
-5. Use link to reset password
+**Header Component Enhancement:**
+- Fully responsive header with balanced layout
+- Logo, search bar, and user menu proportionally distributed
+- Adaptive search bar sizes:
+  - Desktop: 550px
+  - Laptop: 450px → 350px
+  - Tablet: 280px → 200px
+  - Mobile: 140px
+- Grid-based layout for perfect centering
 
-### Database 
-- Nothing directly on the client
-- All you need is Backend running on port 8000
-- .env file with VITE_API_URL
+**ProductSearch Component:**
+- Main search input fully responsive
+- 100% width on mobile devices
+- Adaptive button sizes
+- Centered filter buttons on small screens
+
+### Administrator System
+**New role-based features:**
+- Admin role detection from localStorage (`user_role`)
+- "MODO ADMIN" badge in UserMenu header
+- "Administrar Plazas" button on HomePage (admin-only)
+- New AdminPlazasPage (`/admin/plazas`) with route protection
+- Conditional rendering for admin-exclusive features
+- Console logging for debugging admin access
+
+**Security:**
+- Automatic redirection for non-admin users
+- Role verification on protected routes
+- Admin features hidden from regular users
+
+### Performance Optimizations
+**Lazy Loading Implementation:**
+- Plaza filters now load only when needed (on filter button click)
+- Eliminates unnecessary `GET /prices/options/` request on HomePage load
+- Reduces initial page load time
+- Improves server performance
+
+**API Call Optimization:**
+- Components fetch data only when required
+- No duplicate or redundant requests
+- Proper dependency management in useEffect hooks
+
+### Technical Improvements
+- All pages use consistent responsive patterns
+- Media queries at standard breakpoints (480px, 768px, 992px, 1200px, 1400px)
+- CSS Grid and Flexbox for modern layouts
+- Inline styles with CSS-in-JS patterns for dynamic responsive classes
+- Better separation of concerns in components
+
+---
 
 ## 📞 Support
 
@@ -520,3 +748,4 @@ For issues or questions:
 - Verify that the backend server is running
 - Consult the API documentation at `http://localhost:8000/docs`
 - Check Network tab in DevTools for failed requests
+- For admin issues, verify `user_role` in localStorage
