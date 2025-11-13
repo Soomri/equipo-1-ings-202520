@@ -12,18 +12,24 @@ from pydantic import BaseModel, EmailStr, constr
 from supabase import create_client, Client
 from passlib.hash import argon2
 from dotenv import load_dotenv
+from functools import lru_cache
 import os
 import re
 
 # Router instance
 router = APIRouter(prefix="/registro", tags=["User Registration"])
 
+@lru_cache
+def get_supabase_client() -> Client:
+    from os import getenv
+    url = getenv("SUPABASE_URL")
+    key = getenv("SUPABASE_KEY")
+    if not url or not key:
+        raise ValueError("Missing Supabase credentials")
+    return create_client(url, key)
 
+supabase = get_supabase_client()
 
-
-url = os.getenv("SUPABASE_URL")
-key = os.getenv("SUPABASE_KEY")
-supabase: Client = create_client(url, key)
 
 # Input model for user registration
 class UserRegister(BaseModel):
