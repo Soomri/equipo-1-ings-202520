@@ -29,6 +29,8 @@ from routers_.markets import router as markets_router
 from routers_.prediction_routes import router as prediction_router
 from routers_.market_filter import router as market_filter_router
 
+if not os.getenv("RENDER"):
+    load_dotenv()
 
 # Create tables if they do not exist
 Base.metadata.create_all(bind=engine)
