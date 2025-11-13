@@ -119,7 +119,8 @@ def recover_password(email: EmailStr, db: Session = Depends(get_db)):
 
     # Send email via Gmail SMTP
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
             server.login(os.getenv("EMAIL_USER"), os.getenv("EMAIL_PASS"))
             server.sendmail(os.getenv("EMAIL_USER"), email, msg.as_string())
     except Exception as e:
