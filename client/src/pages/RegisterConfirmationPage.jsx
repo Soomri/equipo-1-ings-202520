@@ -23,32 +23,75 @@ const RegisterConfirmationPage = () => {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#FFFFFF',
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'relative'
-    }}>
-      {/* Logo in top left corner */}
+    <>
+      <style>{`
+        @media (max-width: 850px) {
+          .confirmation-title {
+            font-size: 36px !important;
+            margin-bottom: 60px !important;
+          }
+          .confirmation-box {
+            width: 90% !important;
+            max-width: 800px !important;
+            padding: 40px 30px !important;
+          }
+          .logo-container {
+            left: 20px !important;
+          }
+          .logo-image {
+            height: 150px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .confirmation-title {
+            font-size: 28px !important;
+            margin-bottom: 40px !important;
+          }
+          .confirmation-box {
+            width: 95% !important;
+            padding: 30px 20px !important;
+            height: auto !important;
+            min-height: 200px !important;
+          }
+          .confirmation-text {
+            font-size: 16px !important;
+          }
+          .confirmation-button {
+            width: 200px !important;
+            font-size: 16px !important;
+          }
+          .logo-image {
+            height: 120px !important;
+          }
+        }
+      `}</style>
       <div style={{
-        position: 'absolute',
-        top: '10px',
-        left: '40px'
+        minHeight: '100vh',
+        backgroundColor: '#FFFFFF',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative'
       }}>
-        <Link to="/">
-          <img 
-            src="/client_images/Plaze-Logo.png" 
-            alt="Plaze Logo" 
-            style={{
-              height: '220px',
-              width: 'auto',
-              objectFit: 'contain',
-              cursor: 'pointer'
-            }}
-          />
-        </Link>
-      </div>
+        {/* Logo in top left corner */}
+        <div className="logo-container" style={{
+          position: 'absolute',
+          top: '10px',
+          left: '40px'
+        }}>
+          <Link to="/">
+            <img 
+              className="logo-image"
+              src="/client_images/Plaze-Logo.png" 
+              alt="Plaze Logo" 
+              style={{
+                height: '220px',
+                width: 'auto',
+                objectFit: 'contain',
+                cursor: 'pointer'
+              }}
+            />
+          </Link>
+        </div>
 
       {/* Main content centered */}
       <div style={{
@@ -60,7 +103,7 @@ const RegisterConfirmationPage = () => {
         padding: '20px'
       }}>
         {/* Page title */}
-        <h1 style={{
+        <h1 className="confirmation-title" style={{
           fontSize: '48px',
           fontWeight: '600',
           textAlign: 'center',
@@ -72,7 +115,7 @@ const RegisterConfirmationPage = () => {
         </h1>
 
         {/* Success message box with icon */}
-        <div style={{
+        <div className="confirmation-box" style={{
           position: 'relative',
           width: '800px',
           height: '250px',
@@ -114,7 +157,7 @@ const RegisterConfirmationPage = () => {
           </div>
 
           {/* Message text */}
-          <div style={{
+          <div className="confirmation-text" style={{
             flex: 1,
             color: '#000000',
             fontSize: '18px',
@@ -134,6 +177,7 @@ const RegisterConfirmationPage = () => {
 
         {/* Go to login button */}
         <button
+          className="confirmation-button"
           onClick={handleBackToLogin}
           style={{
             width: '250px',
@@ -153,7 +197,8 @@ const RegisterConfirmationPage = () => {
           Ir a Inicio de sesión
         </button>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
 
