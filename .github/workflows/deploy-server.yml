@@ -27,12 +27,19 @@ jobs:
       - name: Run tests
         working-directory: ./server
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          ALGORITHM: ${{ secrets.ALGORITHM }}
+          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
         run: |
           pytest --maxfail=1 --disable-warnings -q
 
       - name: Trigger Render Deploy Hook
-        if: success() 
+        if: success()
         run: |
           curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
