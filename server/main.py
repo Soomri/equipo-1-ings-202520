@@ -28,6 +28,8 @@ from routers_.plaza_router import router as plaza_router
 from routers_.markets import router as markets_router
 from routers_.prediction_routes import router as prediction_router
 from routers_.market_filter import router as market_filter_router
+import os
+
 
 if not os.getenv("RENDER"):
     load_dotenv()
