@@ -6,107 +6,91 @@ password complexity checks, and secure password hashing using Argon2.
 """
 
 from fastapi import APIRouter, HTTPException, status
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel, EmailStr, constr
 from supabase import create_client, Client
 from passlib.hash import argon2
-from dotenv import load_dotenv
-from functools import lru_cache
-from unittest.mock import MagicMock
 import os
 import re
-
-# =====================================
-# Load environment variables
-# =====================================
-load_dotenv()
+from functools import lru_cache
 
 # Router instance
 router = APIRouter(prefix="/registro", tags=["User Registration"])
 
-# =====================================
-# Safe Supabase client creation
-# =====================================
+# ✅ Safe Supabase client initialization
 @lru_cache
 def get_supabase_client() -> Client:
-    """Creates and caches a Supabase client if environment variables exist."""
+    """
+    Lazily initialize the Supabase client, raising clear error if credentials are missing.
+    """
     url = os.getenv("SUPABASE_URL")
     key = os.getenv("SUPABASE_KEY")
     if not url or not key:
-        raise ValueError("Missing Supabase credentials")
+        raise ValueError("Missing Supabase credentials in environment variables.")
     return create_client(url, key)
 
 
-supabase: Client | None = None
-
-
-def get_client_safe() -> Client:
-    """
-    Returns a real Supabase client if environment variables exist,
-    otherwise returns a mock (for CI/CD or testing environments).
-    """
-    global supabase
-    if supabase is None:
-        try:
-            supabase = get_supabase_client()
-        except ValueError:
-            # Avoids real connection to Supabase during tests
-            return MagicMock()
-    return supabase
-
-
-# =====================================
-# User registration model
-# =====================================
+# Input model for user registration
 class UserRegister(BaseModel):
-    """User registration data model."""
     name: str
     email: EmailStr
     password: constr(min_length=8)
 
 
-# =====================================
-# Password validation
-# =====================================
+# Validate password complexity
 def validate_password(password: str) -> tuple[bool, str]:
-    """Checks password strength requirements."""
     if len(password) < 8:
-        return False, "Password must be at least 8 characters long."
+        return False, "La contraseña debe tener al menos 8 caracteres."
     if not re.search(r"[A-Z]", password):
-        return False, "Password must include at least one uppercase letter."
-    if not re.search(r"[a-z]", password):
-        return False, "Password must include at least one lowercase letter."
-    if not re.search(r"\d", password):
-        return False, "Password must include at least one number."
-    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
-        return False, "Password must include at least one special character."
-    return True, "Valid password."
+        return False, "La contraseña debe contener al menos una letra mayúscula."
+    if not re.search(r"[0-9]", password):
+        return False, "La contraseña debe contener al menos un número."
+    if not re.search(r"[!@#$%^&*]", password):
+        return False, "La contraseña debe contener al menos un carácter especial (!@#$%^&*)."
+    return True, ""
 
 
-# =====================================
-# User registration endpoint
-# =====================================
-@router.post("/", status_code=status.HTTP_201_CREATED)
-async def register_user(user: UserRegister):
-    """Registers a new user after validating email and password."""
-    is_valid, message = validate_password(user.password)
-    if not is_valid:
-        raise HTTPException(status_code=400, detail=message)
+@router.post("/")
+def register_user(user: UserRegister):
+    """
+    Register a new user in the system.
+    """
+    supabase = get_supabase_client()
 
-    client = get_client_safe()
+    try:
+        existing = supabase.table("usuarios").select("*").eq("correo", user.email).execute()
+        if existing.data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Este correo ya ha sido registrado."
+            )
 
-    # Check if user already exists
-    existing_user = client.table("usuarios").select("*").eq("email", user.email).execute()
-    if existing_user.data:
-        raise HTTPException(status_code=400, detail="Email already registered.")
+        is_valid, message = validate_password(user.password)
+        if not is_valid:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=message)
 
-    hashed_password = argon2.hash(user.password)
-    client.table("usuarios").insert({
-        "nombre": user.name,
-        "email": user.email,
-        "password": hashed_password
-    }).execute()
+        hashed_password = argon2.hash(user.password)
 
-    return {"message": "User successfully registered."}
+        response = supabase.table("usuarios").insert({
+            "nombre": user.name,
+            "correo": user.email,
+            "contrasena_hash": hashed_password,
+        }).execute()
 
+        if not response.data:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="El usuario no se pudo crear debido a un error interno."
+            )
+
+        created_user = response.data[0]
+        created_user.pop("contrasena_hash", None)
+
+        return {"message": "Usuario creado correctamente.", "user": created_user}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error inesperado en el servidor: {str(e)}"
+        )
