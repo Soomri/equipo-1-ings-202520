@@ -44,15 +44,6 @@ This test validates that users can enter a product name in the search input fiel
 3. Enter a product name (e.g., "Ajito", "Mayonesa Doy Pack", "Gelatina")
 4. Verify the input accepts and displays the text correctly
 
-**Automated Execution**:
-```bash
-# With Jest + React Testing Library
-npm test -- --testNamePattern="F-01.*search input"
-
-# With Cypress
-npx cypress run --spec "cypress/e2e/price-consultation.cy.js" --grep "search input"
-```
-
 #### **What type of test covers it?**
 
 **Unit Test** - Because it validates:
@@ -104,15 +95,6 @@ This test validates that users can filter products by specific market (plaza de 
 3. Select a market from the dropdown (e.g., "Central Mayorista De Antioquia")
 4. Verify the filter is applied and indicator shows "Filtrando por: [Market Name]"
 5. Click "Buscar precios" to execute search with filter
-
-**Automated Execution**:
-```bash
-# Integration test
-npm test -- --testNamePattern="F-01.*market filter"
-
-# E2E test
-npx cypress run --spec "cypress/e2e/price-consultation.cy.js" --grep "market filter"
-```
 
 #### **What type of test covers it?**
 
@@ -175,15 +157,6 @@ This test validates the core functionality of displaying comprehensive price inf
 3. Click "Buscar precios" button
 4. Wait for results page to load
 5. Verify all price information cards and historical chart display correctly
-
-**Automated Execution**:
-```bash
-# Integration test
-npm test -- --testNamePattern="F-01.*display results"
-
-# E2E test (recommended for full flow)
-npx cypress run --spec "cypress/e2e/price-consultation.cy.js" --grep "display results"
-```
 
 #### **What type of test covers it?**
 
@@ -257,15 +230,6 @@ This test validates that users can switch between different time periods (3, 6, 
 3. Click on each period button sequentially
 4. Verify the chart and statistics update correctly for each period
 5. Confirm variation percentages and trends change appropriately
-
-**Automated Execution**:
-```bash
-# Integration test
-npm test -- --testNamePattern="F-01.*period selection"
-
-# E2E test
-npx cypress run --spec "cypress/e2e/price-consultation.cy.js" --grep "period selection"
-```
 
 #### **What type of test covers it?**
 
@@ -342,15 +306,6 @@ This test validates the application's error handling when a product has no histo
 5. Test "Intentar nuevamente" (Try again) button functionality
 6. Verify "Volver" (Back) button returns to search page
 
-**Automated Execution**:
-```bash
-# Integration test
-npm test -- --testNamePattern="F-01.*handle no data"
-
-# E2E test
-npx cypress run --spec "cypress/e2e/price-consultation.cy.js" --grep "no data"
-```
-
 #### **What type of test covers it?**
 
 **Integration Test** - Because it involves:
@@ -414,15 +369,6 @@ This test validates client-side email validation for incomplete email addresses.
 4. Click "Iniciar Sesión" button
 5. Verify error message displays without backend call
 
-**Automated Execution**:
-```bash
-# Unit/Integration test
-npm test -- --testNamePattern="F-06.*incomplete email"
-
-# E2E test
-npx cypress run --spec "cypress/e2e/login.cy.js" --grep "incomplete email"
-```
-
 #### **What type of test covers it?**
 
 **Unit Test** - Because it validates:
@@ -469,15 +415,6 @@ This test validates that emails with invalid or non-existent domains are caught 
 3. Enter any password
 4. Click "Iniciar Sesión" button
 5. Verify appropriate error message displays
-
-**Automated Execution**:
-```bash
-# Unit/Integration test
-npm test -- --testNamePattern="F-06.*invalid email"
-
-# E2E test
-npx cypress run --spec "cypress/e2e/login.cy.js" --grep "invalid email"
-```
 
 #### **What type of test covers it?**
 
@@ -526,15 +463,6 @@ This test validates the authentication error flow when valid credentials don't m
 3. Enter incorrect password
 4. Click "Iniciar Sesión" button
 5. Verify error handling and field states
-
-**Automated Execution**:
-```bash
-# Integration test (requires backend)
-npm test -- --testNamePattern="F-06.*incorrect credentials"
-
-# E2E test
-npx cypress run --spec "cypress/e2e/login.cy.js" --grep "incorrect credentials"
-```
 
 #### **What type of test covers it?**
 
@@ -585,15 +513,6 @@ This test validates that the form prevents submission when required fields are e
 4. Verify validation error displays
 5. Check that focus moves to first empty field
 
-**Automated Execution**:
-```bash
-# Unit test
-npm test -- --testNamePattern="F-06.*empty fields"
-
-# E2E test
-npx cypress run --spec "cypress/e2e/login.cy.js" --grep "empty fields"
-```
-
 #### **What type of test covers it?**
 
 **Unit Test** - Because it validates:
@@ -643,15 +562,6 @@ This test validates the complete successful authentication flow. It's critical b
 3. Click "Iniciar Sesión" button
 4. Verify successful authentication and redirect
 5. Check user greeting appears in navigation
-
-**Automated Execution**:
-```bash
-# Integration test
-npm test -- --testNamePattern="F-06.*successful login"
-
-# E2E test (recommended for full flow validation)
-npx cypress run --spec "cypress/e2e/login.cy.js" --grep "successful login"
-```
 
 #### **What type of test covers it?**
 
