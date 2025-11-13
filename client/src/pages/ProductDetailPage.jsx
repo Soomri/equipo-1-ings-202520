@@ -425,7 +425,11 @@ const ProductDetailPage = () => {
               {productName}
                 </h1>
 
+<<<<<<< HEAD
             {/* Plaza Filter Badge - Clickeable */}
+=======
+            {/* Plaza Filter Badge */}
+>>>>>>> b95f6a11bc92049b7ebac8e5edd8809f3c6e76ba
               {selectedPlaza && (
                 <button
                   onClick={() => navigate(`/plaza/${encodeURIComponent(selectedPlaza)}`)}
@@ -440,6 +444,7 @@ const ProductDetailPage = () => {
                   fontSize: '0.9375rem',
                   color: '#2E7D32',
                   fontWeight: '600',
+<<<<<<< HEAD
                   border: '2px solid #4CA772',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease'
@@ -447,6 +452,72 @@ const ProductDetailPage = () => {
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = '#D2EDCC'
                     e.currentTarget.style.transform = 'translateY(-2px)'
+=======
+                  border: '2px solid #4CA772'
+                }}
+              >
+                <Store className="w-5 h-5" />
+                <span>Filtrando por: <strong>{selectedPlaza}</strong></span>
+              </div>
+            )}
+
+            {/* Current Price Display */}
+            <div 
+              className="price-header-grid"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '2fr 1fr',
+                gap: '2rem',
+                alignItems: 'center',
+                marginTop: '1.5rem'
+              }}
+            >
+              {/* Price */}
+              <div>
+                <p style={{ fontSize: '1.125rem', color: '#666', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Precio Actual:
+                </p>
+                {currentPrice && currentPrice.precio ? (
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
+                    <span style={{ 
+                      fontSize: '4rem', 
+                      fontWeight: '800', 
+                      color: '#4CA772',
+                      lineHeight: 1
+                    }}>
+                      ${currentPrice.precio.toLocaleString('es-CO')}
+                    </span>
+                    <span style={{ fontSize: '1.75rem', color: '#666', fontWeight: '600' }}>
+                      /kg
+                    </span>
+                  </div>
+                ) : (
+                  <p style={{ fontSize: '1.25rem', color: '#999', fontStyle: 'italic' }}>
+                    Precio no disponible
+                  </p>
+                )}
+                {currentPrice && currentPrice.fecha && (
+                  <p style={{ fontSize: '0.9375rem', color: '#888', marginTop: '0.75rem' }}>
+                    Última actualización: {new Date(currentPrice.fecha).toLocaleString('es-CO', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                )}
+              </div>
+
+              {/* Plaza Info */}
+              {currentPrice && currentPrice.plaza && (
+                <div 
+                  style={{
+                    backgroundColor: '#F5F5F5',
+                    padding: '1.5rem',
+                    borderRadius: '12px',
+                    border: '2px solid #E0E0E0'
+>>>>>>> b95f6a11bc92049b7ebac8e5edd8809f3c6e76ba
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = '#E8F5E9'
@@ -544,10 +615,14 @@ const ProductDetailPage = () => {
                   <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#333', margin: 0 }}>
                     {currentPrice.plaza}
                   </p>
+<<<<<<< HEAD
                   <p style={{ fontSize: '0.75rem', color: '#4CA772', marginTop: '0.5rem', marginBottom: 0, fontWeight: '500' }}>
                     Click para ver detalles →
                   </p>
                 </button>
+=======
+                </div>
+>>>>>>> b95f6a11bc92049b7ebac8e5edd8809f3c6e76ba
               )}
             </div>
           </div>
