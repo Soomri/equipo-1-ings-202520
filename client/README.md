@@ -1,5 +1,6 @@
 # PLAZE - Frontend Client
 
+
 Web application for querying product prices in Medellín's market plazas.
 
 ## 🚀 Features
